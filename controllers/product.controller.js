@@ -31,4 +31,59 @@ const addPrdocut = async (req, res) => {
     }
 }
 
-module.exports = addPrdocut
+
+const modifyProduct = async (req, res) => {
+    try {
+        console.log("Inside ModifyOrder Request");
+
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: "productId is required" })
+        }
+
+        const updatetedProduct = await Product.findByIdAndUpdate(id, req.body, { new: true })
+
+        if (!updatetedProduct) {
+            return res.status(404).json({ message: "Product not found" })
+        }
+
+        console.log("Product Modified Successfully", updatetedProduct);
+
+        return res.status(200).json({ message: "Product Modified Successfully", data: updatetedProduct })
+
+    } catch (error) {
+        console.log("Error occurred while modifing product", error);
+        return res.status(500).json({ message: "Internal Server while modifying product" })
+
+    }
+}
+
+const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params
+
+        if (!id) {
+            return res.status(400).json({ message: "ProductId is required" })
+        }
+
+        const deletedProduct = await Product.findByIdAndDelete(id, { new: true });
+
+        if (!deletedProduct) {
+            return res.status(404).json({ message: "Product not found" })
+        }
+
+        console.log("Product deleted successfully", deletedProduct)
+
+        return res.status(200).json({ message: "Product deleted successfully" })
+    } catch (error) {
+        console.log("Error occurred while deleting product", error);
+        return res.status(500).json({ message: "Internal Server while while deleting product" })
+    }
+}
+
+module.exports = {
+    addPrdocut,
+    modifyProduct,
+    deleteProduct
+}

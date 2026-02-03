@@ -1,8 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const authRoute = require("./routes/auth.route");
-const productRoute = require("./routes/product.route");
-const connectDB = require("./config/db")
+const authRoute = require("./routes/auth.route.js");
+const productRoute = require("./routes/product.route.js");
+const cartRoute = require("./routes/cart.route.js")
+const connectDB = require("./config/db.js")
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ connectDB()
 
 app.use("/api/auth", authRoute);
 app.use("/api/product", productRoute)
+app.use("/api/cart", cartRoute)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

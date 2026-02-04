@@ -1,8 +1,8 @@
-import expres from "express";
-import addToCart from "../controllers/cart.controller.js";
+const express = require("express")
+const { addToCart } = require("../controllers/cart.controller")
 
-const router = expres.Router();
+const router = express.Router();
 
-router.post("/addToCart", addToCart)
+router.post("/addToCart/:id", addToCart)
 
-export default router
+module.exports = router;

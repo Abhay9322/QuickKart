@@ -1,22 +1,27 @@
-import Cart from "../models/cart.model.js";
+const Cart = require("../models/cart.model")
 
 const addToCart = async (req, res) => {
+
+    console.log("Inside AddToCart functionlity");
+
     try {
-        const productId = req.params.id;
 
         const userId = req.params.id;
 
-        if (!product) {
-            return res.status(400).json({ message: "Product not found" })
-        }
+        console.log("userId is:", userId);
+
+
 
         if (!userId) {
             return res.status(400).json({ message: "User not found" })
         }
 
-        const { quantity } = req.body;
+        const { quantity, product1 } = req.body;
 
         const cart = await Cart.find({ userId })
+
+        console.log("Cart data :", cart);
+
 
         if (!cart) {
             const data = await Cart.create({
@@ -36,8 +41,10 @@ const addToCart = async (req, res) => {
         return res.status(200).json({ message: "Product added to cart successfully", cart })
 
     } catch (error) {
+        console.log("Error while adding product to cart:", error);
+
         return res.status(500).json({ message: "Internal Server while adding product to cart", error })
     }
 }
 
-export default addToCart;
+module.exports = { addToCart }

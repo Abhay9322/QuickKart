@@ -1,20 +1,22 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/auth.route.js");
 const productRoute = require("./routes/product.route.js");
 const cartRoute = require("./routes/cart.route.js")
-const connectDB = require("./config/db.js")
+const connectDB = require("./config/db.js");
 
 dotenv.config();
 
 const app = express();
+app.use(cookieParser())
 app.use(express.json());
 
 connectDB()
 
-app.use("/api/auth", authRoute);
-app.use("/api/product", productRoute)
-app.use("/api/cart", cartRoute)
+app.use("/api/v1/user", authRoute);
+app.use("/api/v1/product", productRoute);
+app.use("/api/v1/cart", cartRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

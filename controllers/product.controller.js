@@ -22,7 +22,7 @@ const addPrdocut = async (req, res) => {
 
         console.log("Product added successfully:", product);
 
-        return res.status(200).json({ message: "Product added successfully", })
+        res.status(200).json({ message: "Product added successfully", })
 
     } catch (error) {
         console.log("Internal server error , while adding product", error);
@@ -50,7 +50,7 @@ const modifyProduct = async (req, res) => {
 
         console.log("Product Modified Successfully", updatetedProduct);
 
-        return res.status(200).json({ message: "Product Modified Successfully", data: updatetedProduct })
+        res.status(200).json({ message: "Product Modified Successfully", data: updatetedProduct })
 
     } catch (error) {
         console.log("Error occurred while modifing product", error);
@@ -75,7 +75,7 @@ const deleteProduct = async (req, res) => {
 
         console.log("Product deleted successfully", deletedProduct)
 
-        return res.status(200).json({ message: "Product deleted successfully" })
+        res.status(200).json({ message: "Product deleted successfully" })
     } catch (error) {
         console.log("Error occurred while deleting product", error);
         return res.status(500).json({ message: "Internal Server while while deleting product" })
@@ -91,7 +91,7 @@ const getProducts = async (req, res) => {
             return res.status(400).json({ message: "Products not found" })
         }
 
-        return res.status(200).json({ message: "Product fetched successfully", data: products })
+        res.status(200).json({ message: "Product fetched successfully", data: products })
     } catch (error) {
         return res.status(500).json({ message: "Internal server while fetching pr0ducts" })
     }

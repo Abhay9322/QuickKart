@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 const isLoggedIn = (req, res, next) => {
+    console.log("Inside isLoggedIn middleware");
+
     const token = req.cookies.Token;
 
     if (!token) {
@@ -12,8 +14,10 @@ const isLoggedIn = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        console.log("Decoded data is:", decoded);
 
-        req.user = decoded;   // ✅ attach decoded data
+
+        req.user = decoded;
         next();
 
     } catch (error) {

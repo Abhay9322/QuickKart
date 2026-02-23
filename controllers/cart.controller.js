@@ -1,8 +1,10 @@
 const Cart = require("../models/cart.model");
 
 const addToCart = async (req, res) => {
+    console.log("Inside addToCart controller function");
+
     const userId = req.user.id;
-    const { productId } = req.body;
+    const { productId } = req.params;
 
     if (!userId) {
         return res.status(400).json({

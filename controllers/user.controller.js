@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const { generateAccessToken, generateRefreshToken } = require("../utils/generateToken")
 const User = require("../models/user.model");
 
 const register = async (req, res) => {
@@ -30,7 +31,7 @@ const register = async (req, res) => {
             role
         })
 
-        return res.send({ message: "User registred successfully" })
+        return res.send({ message: "User registred successfully", data: user })
 
     } catch (error) {
         console.log("Error is:", error);
@@ -59,9 +60,15 @@ const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid Email or Password" })
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "1d" })
+        // const token = generateAccessToken(user);
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
 
-        res.cookie("Token", token, {
+        // Save refresh token in DB
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        res.cookie("Token", accessToken, {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000
         })
@@ -72,7 +79,9 @@ const login = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                accessToken: accessToken,
+                refreshToken: refreshToken
             }
         })
     } catch (error) {
@@ -121,4 +130,57 @@ const getProfile = async (req, res) => {
     }
 }
 
-module.exports = { register, login };
+const refreshAccessToken = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: "No refresh token" });
+    }
+
+    // Check in DB
+    const user = await User.findOne({ refreshToken });
+
+    if (!user) {
+        return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: "Expired refresh token" });
+        }
+
+        const newAccessToken = generateAccessToken(user);
+
+        res.json({ accessToken: newAccessToken });
+    });
+};
+
+const logout = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById({ userId });
+
+        if (!user) {
+            return res.status(400).json({
+                success: true,
+                message: "User not found"
+            })
+        }
+
+        user.refreshToken = null;
+        await user.save()
+
+        return res.status(200).json({
+            success: true,
+            message: "User logout successfully"
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
+module.exports = { register, login, getProfile, refreshAccessToken };

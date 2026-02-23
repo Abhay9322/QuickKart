@@ -37,6 +37,9 @@ const userSchema = new mongoose.Schema({
         enum: ["User", "Admin"],
         default: "User"
     },
+    refreshToken: {
+        type: String
+    },
     address: [addressSchema],
     cart: [
         {

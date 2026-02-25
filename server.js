@@ -1,5 +1,5 @@
 const express = require("express");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/auth.route.js");
 const productRoute = require("./routes/product.route.js");
@@ -7,7 +7,7 @@ const cartRoute = require("./routes/cart.route.js")
 const orderRoute = require("./routes/order.route.js")
 const connectDB = require("./config/db.js");
 
-dotenv.config();
+
 
 const app = express();
 app.use(cookieParser())

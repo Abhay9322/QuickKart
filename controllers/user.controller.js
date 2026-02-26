@@ -4,22 +4,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const { generateAccessToken, generateRefreshToken } = require("../utils/generateToken")
 const User = require("../models/user.model");
-
-
-console.log("HOST:", process.env.SMTP_HOST);
-console.log("PORT:", process.env.SMTP_PORT);
-console.log("USER:", process.env.SMTP_USER);
-
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
-
+const emailQueue = require("../queues/email.queue");
 
 
 
@@ -53,13 +38,10 @@ const register = async (req, res) => {
             profileImage
         })
 
-        await transporter.sendMail({
-            from: '"My App" <test@mail.com>',
-            to: email,
-            subject: "Welcome to Our App 🎉",
-            text: `Hello ${name}, Your account has been created successfully.`,
-        });
-
+        await emailQueue.add({
+            email: user.email,
+            name: user.name
+        })
         return res.send({ message: "User registered successfully", data: user })
 
     } catch (error) {
@@ -369,4 +351,13 @@ const changePassword = async (req, res) => {
     }
 };
 
-module.exports = { register, login, getProfile, refreshAccessToken, forgotPassword, resetPassword };
+module.exports = {
+    register,
+    login,
+    getProfile,
+    refreshAccessToken,
+    logout,
+    forgotPassword,
+    resetPassword,
+    changePassword
+};

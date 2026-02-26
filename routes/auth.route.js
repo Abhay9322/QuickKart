@@ -8,8 +8,11 @@ const {
     logout,
     forgotPassword,
     resetPassword,
-    changePassword
+    changePassword,
+    updateProfile,
+
 } = require("../controllers/user.controller");
+const isLoggedIn = require("../middlewares/auth.middleware")
 
 
 const router = express.Router();
@@ -31,5 +34,6 @@ router.post("/resetPassword/:token", resetPassword);
 router.post("/refreshAccessToken", refreshAccessToken);
 router.post("/logout", logout);
 router.post("/changePassword", changePassword);
+router.post("/updateProfile", isLoggedIn, upload.single("profileImage"), updateProfile);
 
 module.exports = router;

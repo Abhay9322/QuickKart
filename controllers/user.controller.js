@@ -85,7 +85,7 @@ const login = async (req, res) => {
         })
 
         res.status(200).json({
-            message: "User logged in successfully", token,
+            message: "User logged in successfully", accessToken,
             user: {
                 id: user._id,
                 name: user.name,
@@ -351,6 +351,69 @@ const changePassword = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        console.log("Inside profile update");
+
+        const userId = req.user.id;
+        console.log("id is", userId);
+
+        const { name, phone } = req.body;
+        let { address } = req.body; // ✅ FIX
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (name) user.name = name;
+        if (phone) user.phone = phone;
+
+        // multer upload
+        if (req.file) {
+            user.profileImage = req.file.path;
+        }
+
+        // ✅ Address Handling
+        if (address) {
+
+            // form-data fix
+            if (typeof address === "string") {
+                address = JSON.parse(address);
+            }
+
+            // default address logic
+            if (address.isDefault) {
+                user.address.forEach(addr => {
+                    addr.isDefault = false;
+                });
+            }
+
+            user.address.push(address);
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Profile update failed"
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -359,5 +422,6 @@ module.exports = {
     logout,
     forgotPassword,
     resetPassword,
-    changePassword
+    changePassword,
+    updateProfile
 };

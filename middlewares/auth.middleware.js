@@ -13,7 +13,7 @@ const isLoggedIn = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
         console.log("Decoded data is:", decoded);
 
 

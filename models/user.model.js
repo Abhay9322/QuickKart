@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema({
         type: Date
     },
     address: [addressSchema],
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     cart: [
         {
             productId: {

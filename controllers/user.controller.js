@@ -61,6 +61,12 @@ const login = async (req, res) => {
 
         const user = await User.findOne({ email })
 
+        if (user.isBlocked) {
+            return res.status(403).json({
+                message: "Your account is blocked by admin"
+            });
+        }
+
         if (!user) {
             return res.status(400).json({ message: "Invalid Email or Password" })
         }
@@ -359,7 +365,7 @@ const updateProfile = async (req, res) => {
         console.log("id is", userId);
 
         const { name, phone } = req.body;
-        let { address } = req.body; // ✅ FIX
+        let { address } = req.body;
 
         const user = await User.findById(userId);
 
@@ -378,7 +384,7 @@ const updateProfile = async (req, res) => {
             user.profileImage = req.file.path;
         }
 
-        // ✅ Address Handling
+        //  Address Handling
         if (address) {
 
             // form-data fix
@@ -413,6 +419,103 @@ const updateProfile = async (req, res) => {
         });
     }
 };
+const uploadProfileImage = async (req, res) => {
+    try {
+        console.log("Inside change profile");
+
+        const userId = req.user.id;
+        console.log("id is", userId);
+
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // multer upload
+        if (req.file) {
+            user.profileImage = req.file.path;
+        }
+
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Profile update failed"
+        });
+    }
+};
+
+
+const blockUser = async (req, res) => {
+
+    try {
+        console.log("Inside blockUser controller");
+
+        const userId = req.params.id;
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { isBlocked: true },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "User blocked successfully",
+            user
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            user
+        });
+    }
+};
+const unblockUser = async (req, res) => {
+
+    try {
+        console.log("Inside unblockUser controller");
+
+        const userId = req.params.id;
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { isBlocked: false },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "User unblocked successfully",
+            user
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            user
+        });
+    }
+};
+
 
 module.exports = {
     register,
@@ -423,5 +526,8 @@ module.exports = {
     forgotPassword,
     resetPassword,
     changePassword,
-    updateProfile
+    updateProfile,
+    uploadProfileImage,
+    blockUser,
+    unblockUser
 };

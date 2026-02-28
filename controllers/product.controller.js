@@ -2,9 +2,9 @@ const Product = require("../models/product.model")
 
 const addPrdocut = async (req, res) => {
     try {
-        const { title, description, price, quantity, stock, category } = req.body;
+        const { title, description, price, quantity, stock, categoryID } = req.body;
 
-        if (!title || !description || !price || !category || !quantity.value || !quantity.unit) {
+        if (!title || !description || !price || !categoryID || !quantity.value || !quantity.unit) {
             return res.status(400).json({ message: "Missing required fields" })
         }
 
@@ -17,7 +17,7 @@ const addPrdocut = async (req, res) => {
                 unit: quantity.unit
             },
             stock,
-            category
+            category: categoryID
         });
 
         console.log("Product added successfully:", product);
@@ -30,7 +30,6 @@ const addPrdocut = async (req, res) => {
 
     }
 }
-
 
 const modifyProduct = async (req, res) => {
     try {
@@ -81,7 +80,6 @@ const deleteProduct = async (req, res) => {
         return res.status(500).json({ message: "Internal Server while while deleting product" })
     }
 }
-
 
 const getProducts = async (req, res) => {
     try {

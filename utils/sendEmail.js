@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendEmail = async (email, name) => {
+const sendEmail = async (email, subject, message) => {
     try {
 
         const transporter = nodemailer.createTransport({
@@ -16,8 +16,8 @@ const sendEmail = async (email, name) => {
         const info = await transporter.sendMail({
             from: '"My App" <test@mail.com>',
             to: email,
-            subject: "Welcome to Our App 🎉",
-            text: `Hello ${name}, Your account has been created successfully.`,
+            subject: subject,
+            html: message
         });
 
         console.log("✅ Email Sent:", info.messageId);

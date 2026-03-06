@@ -39,7 +39,14 @@ const productSchema = new mongoose.Schema({
         ref: "Category",
         required: true
     },
-
+    featured: {
+        type: Boolean,
+        default: false
+    },
+    sold: {
+        type: Number,
+        default: 0
+    },
     isActive: {
         type: Boolean,
         default: true

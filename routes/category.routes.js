@@ -4,8 +4,8 @@ const isLoggedIn = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
-router.post("/createCategory", isLoggedIn, createCategory)
-router.get("/getCategories", isLoggedIn, getCategories)
+router.post("/createCategory", createCategory)
+router.get("/getCategories", getCategories)
 
 
 module.exports = router;

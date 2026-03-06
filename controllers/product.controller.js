@@ -2,7 +2,7 @@ const Product = require("../models/product.model")
 
 const addPrdocut = async (req, res) => {
     try {
-        const { title, description, price, quantity, stock, categoryID } = req.body;
+        const { title, description, price, featured, quantity, stock, categoryID } = req.body;
 
         if (!title || !description || !price || !categoryID || !quantity.value || !quantity.unit) {
             return res.status(400).json({ message: "Missing required fields" })
@@ -16,6 +16,7 @@ const addPrdocut = async (req, res) => {
                 value: quantity.value,
                 unit: quantity.unit
             },
+            featured: featured,
             stock,
             category: categoryID
         });
@@ -109,10 +110,212 @@ const getProductById = async (req, res) => {
         return res.status(500).json({ message: "Internal server while fetching product details" })
     }
 }
+
+const getProductByName = async (req, res) => {
+    try {
+        console.log("Inside getProductByName controller");
+
+        const { productName } = req.body;
+
+
+        if (!productName) {
+            return res.status(400).json({ message: "productName is required" })
+        }
+
+        const product = await Product.findOne({ title: { $regex: productName, $options: "i" } });
+
+        if (!product) {
+            return res.status(400).json({ message: "product not found" })
+        }
+        res.status(200).json({ message: "Product fetched successfully", data: product })
+
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server while fetching product details" })
+    }
+}
+
+const filterProducts = async (req, res) => {
+    try {
+        const { minPrice, maxPrice } = req.body;
+
+        if (!minPrice || !maxPrice) {
+            return res.status(400).json({ message: "minPrice and maxPrice are required" })
+        }
+
+        const products = await Product.find({
+            price: { $gt: minPrice, $lt: maxPrice }
+        });
+
+        res.status(200).json({ message: "Products fetched successfully", data: products })
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server while fetching products details" })
+    }
+}
+
+const getSortedProducts = async (req, res) => {
+    try {
+
+        const { sort } = req.query;
+
+        let sortOption = {};
+
+        switch (sort) {
+
+            case "priceLowHigh":
+                sortOption = { price: 1 };
+                break;
+
+            case "priceHighLow":
+                sortOption = { price: -1 };
+                break;
+
+            case "rating":
+                sortOption = { rating: -1 };
+                break;
+
+            case "newest":
+                sortOption = { createdAt: -1 };
+                break;
+
+            default:
+                sortOption = { createdAt: -1 };
+        }
+
+        const products = await Product.find().sort(sortOption);
+
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+    }
+};
+
+const getFeaturedProducts = async (req, res) => {
+    try {
+        const products = await Product.find({ featured: true });
+
+        if (!products || products.length == 0) {
+            return res.status(400).json({ message: "featured products not found" })
+        }
+
+        res.status(200).json({ message: "featured products fetched successfully", data: products })
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server while fetching featured products" })
+    }
+}
+
+const getTrendingProducts = async (req, res) => {
+    try {
+        const products = await Product.find().sort({ sold: -1 }).limit(5);
+
+        if (!products) {
+            return res.status(400).json({ message: "Trending products not found" })
+        }
+        res.status(200).json({ message: "Trending products fetched successfully", data: products })
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server while fetching products" })
+    }
+}
+
+const getProductStock = async (req, res) => {
+    try {
+
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            stock: product.stock
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};
+
+const updateStock = async (req, res) => {
+
+    try {
+
+        const { stock } = req.body;
+
+        const product = await Product.findByIdAndUpdate(
+            req.params.id,
+            { stock },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Stock updated",
+            product
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
+const getLowStockProducts = async (req, res) => {
+
+    try {
+
+        const products = await Product.find({
+            stock: { $lt: 10 }
+        });
+
+        res.status(200).json({
+            success: true,
+            products
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
 module.exports = {
     addPrdocut,
     updateProduct,
     deleteProduct,
     getProducts,
-    getProductById
+    getProductById,
+    getProductByName,
+    filterProducts,
+    getSortedProducts,
+    getFeaturedProducts,
+    getTrendingProducts,
+    getProductStock,
+    updateStock,
+    getLowStockProducts
 }

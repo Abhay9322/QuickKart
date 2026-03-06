@@ -2,7 +2,12 @@ const Category = require("../models/category.model");
 
 const createCategory = async (req, res) => {
     try {
+        console.log("Inside createCategory controller function");
+
         const { name } = req.body;
+
+        console.log("Name is:", name);
+
 
         const exist = await Category.findOne({ name });
 
@@ -13,6 +18,8 @@ const createCategory = async (req, res) => {
         }
 
         const category = await Category.create({ name });
+        console.log("Category is:", category);
+
 
         res.status(201).json({
             success: true,

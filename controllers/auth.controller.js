@@ -11,8 +11,10 @@ const register = async (req, res) => {
     try {
         const { name, email, password, phone, role } = req.body;
         const profileImage = req.file ? req.file.path : null;
+        console.log("ProfileImage url :", profileImage);
 
-        if (!name || !email || !password || !profileImage) {
+
+        if (!name || !email || !password) {
             return res.status(400).json({ message: "Required fields are missing" })
         }
         const existingUser = await User.findOne({
@@ -46,19 +48,15 @@ const register = async (req, res) => {
 
         const verifyURL = `http://localhost:5000/api/auth/verify-email/${token}`;
 
-        const message = `
-      <h2>Email Verification</h2>
-      <a href="${verifyURL}">
-        Click to Verify Email
-      </a>
-  `;
+        const message = `<h2>Email Verification</h2>
+                         <a href="${verifyURL}">Click to Verify Email</a>`;
 
         await emailQueue.add({
             email: user.email,
             subject: "Verify Your Email",
             message: message
         })
-        return res.send({ message: "Verification email sent" })
+        res.send({ message: "Verification email sent" })
 
     } catch (error) {
         console.log("Error is:", error);
@@ -341,12 +339,20 @@ const changePassword = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
     try {
+        console.log("Inside verifyEmail Controller function");
+
         const token = req.params.token;
+
+        console.log("Token is", token);
+
 
         const user = await User.findOne({
             emailVerificationToken: token,
             emailVerificationExpire: { $gt: Date.now() }
         });
+
+        console.log("User", user);
+
 
         if (!user) {
             return res.status(400).json({
@@ -358,7 +364,11 @@ const verifyEmail = async (req, res) => {
         user.emailVerificationToken = undefined;
         user.emailVerificationExpire = undefined;
 
+
+
+
         await user.save();
+        console.log("isEmailVerified:", user.isEmailVerified);
 
         res.status(200).json({
             success: true,
@@ -383,3 +393,4 @@ module.exports = {
     changePassword,
     verifyEmail
 };
+

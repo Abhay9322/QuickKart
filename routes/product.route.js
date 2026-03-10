@@ -13,10 +13,21 @@ const {
     updateStock,
     getLowStockProducts
 } = require("../controllers/product.controller")
+const upload = require("../middlewares/upload")
 
 const router = express.Router();
 
-router.post("/addProduct", addPrdocut);
+// router.post("/addProduct", addPrdocut);
+router.post(
+    "/addProduct",
+    upload.array("images", 5),
+    addPrdocut
+);
+// router.post(
+//     "/products",
+//     upload.array("images", 5),
+//     createProduct
+// );
 router.put("/modifyProduct/:id", updateProduct);
 router.delete("/deleteProduct/:id", deleteProduct);
 router.get("/getProducts", getProducts)

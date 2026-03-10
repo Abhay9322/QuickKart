@@ -191,5 +191,89 @@ const getOrders = async (req, res) => {
     }
 }
 
+const orderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        // check orderId
+        if (!orderId) {
+            return res.status(400).json({
+                success: false,
+                message: "orderId is required"
+            });
+        }
+
+        // find order
+        const order = await Order.findOne({ orderId });
+
+        // if order not found
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        // success response
+        res.status(200).json({
+            success: true,
+            message: "Order status fetched successfully",
+            data: order.status
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+const orderHistory = async (req, res) => {
+    try {
+
+        const totalOrders = await Order.countDocuments({ user: req.params.id });
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+
+        const skip = (page - 1) * limit;
+
+        // find orders
+        const orders = await Order
+            .find({ user: req.params.id })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        // check if no orders found
+        if (orders.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Orders not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            page,
+            limit,
+            totalOrders,
+            totalPages: Math.ceil(totalOrders / limit),
+            data: orders
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
 
 module.exports = { createOrder, getUserOrders, getOrders };

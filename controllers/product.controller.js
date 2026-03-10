@@ -4,9 +4,21 @@ const addPrdocut = async (req, res) => {
     try {
         const { title, description, price, featured, quantity, stock, categoryID } = req.body;
 
+        // // uploaded images ko array me convert karna
+        // const images = req.files.map(file => ({
+        //     url: file.path,        // cloudinary image url
+        //     public_id: file.filename  // cloudinary public id
+        // }));
+
+        const images = req.files?.map(file => ({
+            url: file.path,
+            public_id: file.filename
+        })) || [];
+
         if (!title || !description || !price || !categoryID || !quantity.value || !quantity.unit) {
             return res.status(400).json({ message: "Missing required fields" })
         }
+
 
         const product = await Product.create({
             title,
@@ -18,7 +30,8 @@ const addPrdocut = async (req, res) => {
             },
             featured: featured,
             stock,
-            category: categoryID
+            category: categoryID,
+            images: images
         });
 
         console.log("Product added successfully:", product);

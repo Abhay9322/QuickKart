@@ -1,6 +1,6 @@
 const Product = require("../models/product.model")
 
-const addPrdocut = async (req, res) => {
+const createProdcut = async (req, res) => {
     try {
         const { title, description, price, featured, quantity, stock, categoryID } = req.body;
 
@@ -317,8 +317,9 @@ const getLowStockProducts = async (req, res) => {
 
 };
 
+
 module.exports = {
-    addPrdocut,
+    createProdcut,
     updateProduct,
     deleteProduct,
     getProducts,

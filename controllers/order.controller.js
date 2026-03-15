@@ -276,4 +276,124 @@ const orderHistory = async (req, res) => {
     }
 };
 
-module.exports = { createOrder, getUserOrders, getOrders };
+const returnRequest = async (req, res) => {
+    try {
+
+        const { orderId, reason } = req.body;
+
+        if (!orderId || !reason) {
+            return res.status(400).json({
+                success: false,
+                message: "orderId and reason are required"
+            });
+        }
+
+        const order = await Order.findOne({ orderId });
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        order.returnStatus = "Requested";
+        order.returnReason = reason;
+
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Return request submitted successfully"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+
+    }
+};
+
+const cancelOrder = async (req, res) => {
+    try {
+
+        const { orderId } = req.params;
+
+        if (!orderId) {
+            return res.status(400).json({
+                success: false,
+                message: "orderId is required"
+            });
+        }
+
+        // find order
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        // check if already shipped
+        if (
+            order.orderStatus === "Shipped" ||
+            order.orderStatus === "Out for Delivery" ||
+            order.orderStatus === "Delivered"
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Order cannot be cancelled after shipping"
+            });
+        }
+
+        // update status
+        order.orderStatus = "Cancelled";
+
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Order cancelled successfully",
+            data: order
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+const exchangeRequest = async (req, res) => {
+    try {
+        const { orderId, reason } = req.body;
+
+        if (!orderId || !reason) {
+
+        }
+    } catch (error) {
+
+    }
+}
+
+module.exports = {
+    createOrder,
+    getUserOrders,
+    getOrders,
+    orderStatus,
+    orderHistory,
+    returnRequest,
+    cancelOrder,
+    exchangeRequest
+};

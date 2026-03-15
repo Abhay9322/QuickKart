@@ -394,3 +394,6 @@ module.exports = {
     verifyEmail
 };
 
+
+
+const { name, email, password } = user;

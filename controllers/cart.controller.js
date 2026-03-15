@@ -104,6 +104,64 @@ const removeFromCart = async (req, res) => {
     }
 }
 
+const updateCartQuantity = async (req, res) => {
+
+    console.log("Inside updateCartQuantity controller");
+
+    const userId = req.user.id;
+    const { productId } = req.params;
+    const { quantity } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({
+            success: false,
+            message: "Authentication is required"
+        });
+    }
+
+    try {
+
+        const cart = await Cart.findOne({ user: userId });
+
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found"
+            });
+        }
+
+        const product = cart.items.find(
+            (item) => item.product.toString() === productId
+        );
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found in cart"
+            });
+        }
+
+        // quantity update
+        product.quantity = quantity;
+
+        await cart.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Cart quantity updated successfully",
+            cart
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
 const clearCart = async (req, res) => {
     const userId = req.user.id;
 
@@ -143,4 +201,52 @@ const clearCart = async (req, res) => {
     }
 }
 
-module.exports = { addToCart, removeFromCart, clearCart };
+const getCartTotal = async (req, res) => {
+
+    const userId = req.user.id;
+
+    try {
+
+        const cart = await Cart.findOne({ user: userId }).populate("items.product");
+
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found"
+            });
+        }
+
+        let totalAmount = 0;
+
+        cart.items.forEach((item) => {
+
+            const price = item.product.price;   // product ka price
+            const quantity = item.quantity;     // product quantity
+
+            totalAmount += price * quantity;    // total calculation
+
+        });
+
+        return res.status(200).json({
+            success: true,
+            totalAmount,
+            cart
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+module.exports = {
+    addToCart,
+    removeFromCart,
+    updateCartQuantity,
+    clearCart,
+    getCartTotal
+};

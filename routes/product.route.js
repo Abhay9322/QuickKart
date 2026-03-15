@@ -1,9 +1,10 @@
 const express = require("express");
 const {
-    addPrdocut,
+    createProdcut,
     updateProduct,
     deleteProduct,
     getProducts,
+    getProductById,
     getProductByName,
     filterProducts,
     getSortedProducts,
@@ -12,6 +13,7 @@ const {
     getProductStock,
     updateStock,
     getLowStockProducts
+
 } = require("../controllers/product.controller")
 const upload = require("../middlewares/upload")
 
@@ -21,7 +23,7 @@ const router = express.Router();
 router.post(
     "/addProduct",
     upload.array("images", 5),
-    addPrdocut
+    createProdcut
 );
 // router.post(
 //     "/products",
@@ -39,6 +41,7 @@ router.get("/getTrendingProducts", getTrendingProducts)
 router.get("/getProductStock/:id", getProductStock)
 router.put("/updateStock/:id", updateStock)
 router.get("/getLowStockProducts", getLowStockProducts)
+router.get("/getProductById", getProductById)
 
 
 module.exports = router;

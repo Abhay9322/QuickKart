@@ -56,7 +56,17 @@ const productSchema = new mongoose.Schema({
             url: String,
             public_id: String
         }
-    ]
+    ],
+    returnStatus: {
+        type: String,
+        enum: ["None", "Requested", "Approved", "Rejected", "Completed"],
+        default: "None"
+    },
+
+    returnReason: {
+        type: String,
+        required: true
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema);

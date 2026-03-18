@@ -13,35 +13,37 @@ const {
     getProductStock,
     updateStock,
     getLowStockProducts
+} = require("../controllers/product.controller");
 
-} = require("../controllers/product.controller")
-const upload = require("../middlewares/upload")
+const upload = require("../middlewares/upload");
 
 const router = express.Router();
 
-// router.post("/addProduct", addPrdocut);
-router.post(
-    "/addProduct",
-    upload.array("images", 5),
-    createProdcut
-);
-// router.post(
-//     "/products",
-//     upload.array("images", 5),
-//     createProduct
-// );
-router.put("/modifyProduct/:id", updateProduct);
-router.delete("/deleteProduct/:id", deleteProduct);
-router.get("/getProducts", getProducts)
-router.get("/getProductByName", getProductByName)
-router.get("/filterProduct", filterProducts)
-router.get("/getSortedProducts", getSortedProducts)
-router.get("/getFeaturedProducts", getFeaturedProducts)
-router.get("/getTrendingProducts", getTrendingProducts)
-router.get("/getProductStock/:id", getProductStock)
-router.put("/updateStock/:id", updateStock)
-router.get("/getLowStockProducts", getLowStockProducts)
-router.get("/getProductById", getProductById)
 
+router.post("/", upload.array("images", 5), createProdcut);
+
+router.get("/", getProducts);
+
+router.get("/:id", getProductById);
+
+router.get("/search/name", getProductByName);
+
+router.get("/filter", filterProducts);
+
+router.get("/sort", getSortedProducts);
+
+router.get("/featured", getFeaturedProducts);
+
+router.get("/trending", getTrendingProducts);
+
+router.put("/:id", updateProduct);
+
+router.delete("/:id", deleteProduct);
+
+router.get("/:id/stock", getProductStock);
+
+router.put("/:id/stock", updateStock);
+
+router.get("/stock/low", getLowStockProducts);
 
 module.exports = router;

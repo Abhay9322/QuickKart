@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middlewares/upload")
-// const multer = require("multer");
+
+const upload = require("../middlewares/upload");
+const isLoggedIn = require("../middlewares/auth.middleware");
 
 const {
     register,
@@ -13,16 +14,21 @@ const {
     changePassword,
     verifyEmail
 } = require("../controllers/auth.controller");
-const isLoggedIn = require("../middlewares/auth.middleware")
-
 
 router.post("/register", upload.single("profileImage"), register);
+
 router.post("/login", login);
-router.post("/forgotPassword", forgotPassword);
-router.post("/resetPassword/:token", resetPassword);
-router.post("/refreshAccessToken", refreshAccessToken);
+
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password/:token", resetPassword);
+
+router.post("/refresh-token", refreshAccessToken);
+
 router.post("/logout", isLoggedIn, logout);
-router.post("/changePassword", isLoggedIn, changePassword);
+
+router.put("/change-password", isLoggedIn, changePassword);
+
 router.get("/verify-email/:token", verifyEmail);
 
 module.exports = router;

@@ -393,7 +393,3 @@ module.exports = {
     changePassword,
     verifyEmail
 };
-
-
-
-const { name, email, password } = user;

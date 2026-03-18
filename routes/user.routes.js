@@ -1,20 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middlewares/upload")
-// const multer = require("multer");
+
+const upload = require("../middlewares/upload");
+const isLoggedIn = require("../middlewares/auth.middleware");
 
 const {
     getProfile,
     updateProfile,
-    uploadProfileImage,
-
+    uploadProfileImage
 } = require("../controllers/user.controller");
-const isLoggedIn = require("../middlewares/auth.middleware")
 
+router.get("/profile", isLoggedIn, getProfile);
 
+router.put("/profile", isLoggedIn, upload.single("profileImage"), updateProfile);
 
-router.get("/profile", getProfile);
-router.post("/updateProfile", isLoggedIn, upload.single("profileImage"), updateProfile);
-router.put("/uploadProfileImage", isLoggedIn, upload.single("profileImage"), uploadProfileImage);
+router.put("/profile/image", isLoggedIn, upload.single("profileImage"), uploadProfileImage);
 
 module.exports = router;

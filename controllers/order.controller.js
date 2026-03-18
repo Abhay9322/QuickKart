@@ -1,6 +1,7 @@
 const Order = require("../models/order.model");
 const Cart = require("../models/cart.model");
 const Product = require("../models/product.model");
+const Coupon = require("../models/coupon.model");
 
 // Helper function to generate orderId
 const generateOrderId = () => {
@@ -10,8 +11,8 @@ const generateOrderId = () => {
 const createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
+        const { couponCode, shippingAddress, paymentMethod } = req.body;
 
-        // 1️⃣ Check cart
         const cart = await Cart.findOne({ user: userId }).populate("items.product");
 
         if (!cart || cart.items.length === 0) {
@@ -25,12 +26,9 @@ const createOrder = async (req, res) => {
         let subtotalAmount = 0;
         let totalItems = 0;
 
-        // 2️⃣ Validate products & calculate totals
         for (let item of cart.items) {
-
             const product = item.product;
 
-            // Stock check
             if (product.stock < item.quantity) {
                 return res.status(400).json({
                     success: false,
@@ -43,7 +41,6 @@ const createOrder = async (req, res) => {
             subtotalAmount += subtotal;
             totalItems += item.quantity;
 
-            // Order item snapshot
             orderItems.push({
                 productId: product._id,
                 name: product.title,
@@ -53,29 +50,84 @@ const createOrder = async (req, res) => {
                 subtotal: subtotal
             });
 
-            // 3️⃣ Update stock
             product.stock -= item.quantity;
-
-            // 4️⃣ Update sold count (for trending products)
             product.sold += item.quantity;
 
             await product.save();
         }
 
-        // 5️⃣ Pricing calculation
+        let discountAmount = 0;
+        let appliedCoupon = null;
+
+        if (couponCode) {
+            const formattedCode = couponCode.toUpperCase().trim();
+
+            const coupon = await Coupon.findOne({ code: formattedCode });
+
+            if (!coupon) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon"
+                });
+            }
+
+            if (!coupon.isActive) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Coupon not active"
+                });
+            }
+
+            if (coupon.expiryTime && new Date() > coupon.expiryTime) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Coupon expired"
+                });
+            }
+
+            if (subtotalAmount < coupon.minAmount) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Minimum amount should be ${coupon.minAmount}`
+                });
+            }
+
+            const userUsageCount = coupon.usedBy.filter(
+                (id) => id.toString() === userId.toString()
+            ).length;
+
+            if (userUsageCount >= coupon.usageLimitPerUser) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Coupon usage limit exceeded"
+                });
+            }
+
+            if (coupon.discountType === "percentage") {
+                discountAmount = (subtotalAmount * coupon.discount) / 100;
+            } else {
+                discountAmount = coupon.discount;
+            }
+
+            if (coupon.maxDiscount) {
+                discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+            }
+
+            discountAmount = Math.min(discountAmount, subtotalAmount);
+
+            appliedCoupon = coupon;
+        }
+
         const taxAmount = subtotalAmount * 0.05;
         const shippingCharge = subtotalAmount > 500 ? 0 : 50;
-        const discountAmount = 0;
 
         const grandTotal =
             subtotalAmount + taxAmount + shippingCharge - discountAmount;
 
-        // 6️⃣ Create Order
         const newOrder = await Order.create({
             orderId: generateOrderId(),
             userId: userId,
             items: orderItems,
-
             pricingDetails: {
                 totalItems,
                 subtotalAmount,
@@ -84,19 +136,23 @@ const createOrder = async (req, res) => {
                 discountAmount,
                 grandTotal
             },
-
-            shippingAddress: req.body.shippingAddress,
-
+            coupon: appliedCoupon?._id || null,
+            couponCode: appliedCoupon?.code || null,
+            shippingAddress: shippingAddress,
             paymentInfo: {
-                method: req.body.paymentMethod || "COD",
-                status: req.body.paymentMethod === "COD" ? "pending" : "paid"
+                method: paymentMethod || "COD",
+                status: paymentMethod === "COD" ? "pending" : "paid"
             },
-
             orderStatus: "pending",
-            isPaid: req.body.paymentMethod === "COD" ? false : true
+            isPaid: paymentMethod === "COD" ? false : true
         });
 
-        // 7️⃣ Clear cart
+        if (appliedCoupon) {
+            await Coupon.findByIdAndUpdate(appliedCoupon._id, {
+                $push: { usedBy: userId }
+            });
+        }
+
         cart.items = [];
         await cart.save();
 
@@ -107,12 +163,10 @@ const createOrder = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             success: false,
             message: error.message
         });
-
     }
 };
 
@@ -153,6 +207,7 @@ const getUserOrders = async (req, res) => {
         })
     }
 }
+
 const getOrders = async (req, res) => {
     console.log("Inside getOrders controller");
 
@@ -386,6 +441,46 @@ const exchangeRequest = async (req, res) => {
 
     }
 }
+
+const orderTracking = async (req, res) => {
+    try {
+        const { id: trackingId } = req.params;
+
+        if (!trackingId || trackingId.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Tracking ID is required"
+            });
+        }
+
+        const order = await Order.findOne(
+            { "trackingInfo.trackingId": trackingId },
+            { trackingInfo: 1, orderStatus: 1 }
+        );
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order tracking fetched successfully",
+            trackingInfo: order.trackingInfo,
+            orderStatus: order.orderStatus
+        });
+
+    } catch (error) {
+        console.error("Order Tracking Error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
 
 module.exports = {
     createOrder,

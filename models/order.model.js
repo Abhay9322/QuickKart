@@ -106,7 +106,7 @@ const orderSchema = new mongoose.Schema(
 
         trackingInfo: {
             courierName: { type: String },
-            trackingId: { type: String },
+            trackingId: { type: String, index: true },
             shippedAt: { type: Date },
             deliveredAt: { type: Date }
         },

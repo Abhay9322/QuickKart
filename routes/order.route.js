@@ -1,4 +1,5 @@
-const express = require("express")
+const express = require("express");
+
 const {
     createOrder,
     getUserOrders,
@@ -8,20 +9,26 @@ const {
     returnRequest,
     cancelOrder,
     exchangeRequest
+} = require("../controllers/order.controller");
 
-} = require("../controllers/order.controller")
 const isLoggedIn = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
-router.post("/createOrder", isLoggedIn, createOrder)
-router.get("/getUserOrders", isLoggedIn, getUserOrders)
-router.get("/getOrders", isLoggedIn, getOrders)
-router.get("/orderStatus", orderStatus)
-router.get("/orderHistory", orderHistory);
-router.post("/returnRequest", returnRequest);
-router.put("/cancelOrder", cancelOrder);
-router.put("/exchangeRequest", exchangeRequest)
+router.post("/", isLoggedIn, createOrder);
 
+router.get("/my-orders", isLoggedIn, getUserOrders);
+
+router.get("/", isLoggedIn, getOrders);
+
+router.get("/:id/status", isLoggedIn, orderStatus);
+
+router.get("/history", isLoggedIn, orderHistory);
+
+router.post("/:id/return", isLoggedIn, returnRequest);
+
+router.put("/:id/cancel", isLoggedIn, cancelOrder);
+
+router.put("/:id/exchange", isLoggedIn, exchangeRequest);
 
 module.exports = router;

@@ -1,17 +1,13 @@
 const express = require("express");
+
+const { blockUser, unblockUser } = require("../controllers/admin.controller");
+
+const isLoggedIn = require("../middlewares/auth.middleware");
+
 const router = express.Router();
-const upload = require("../middlewares/upload")
-// const multer = require("multer");
 
-const {
-    blockUser,
-    unblockUser
+router.patch("/users/:id/block", isLoggedIn, blockUser);
 
-} = require("../controllers/admin.controller");
-const isLoggedIn = require("../middlewares/auth.middleware")
-
-
-router.patch("/blockUser/:id", blockUser);
-router.patch("/unblockUser/:id", unblockUser);
+router.patch("/users/:id/unblock", isLoggedIn, unblockUser);
 
 module.exports = router;

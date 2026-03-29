@@ -11,7 +11,7 @@ const productRoute = require("./routes/product.route");
 const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
 
-const connectDB = require("./config/db");
+const connectDB = require("./db/db");
 
 const app = express();
 

@@ -9,9 +9,15 @@ const emailQueue = require("../queues/email.queue");
 
 const register = async (req, res) => {
     try {
+        console.log("Inside register api controller");
+
         const { name, email, password, phone, role } = req.body;
-        const profileImage = req.file ? req.file.path : null;
-        console.log("ProfileImage url :", profileImage);
+        console.log("BODY:", req.body);
+
+
+
+        // const profileImage = req.file ? req.file.path : null;
+        // console.log("ProfileImage url :", profileImage);
 
 
         if (!name || !email || !password) {
@@ -36,13 +42,13 @@ const register = async (req, res) => {
             password: hashedPassword,
             phone,
             role,
-            profileImage
+            // profileImage
         });
 
         const token = crypto.randomBytes(32).toString("hex");
 
-        user.emailVerificationToken = token,
-            user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
+        user.emailVerificationToken = token;
+        user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
 
         await user.save();
 

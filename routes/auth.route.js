@@ -15,7 +15,8 @@ const {
     verifyEmail
 } = require("../controllers/auth.controller");
 
-router.post("/register", upload.single("profileImage"), register);
+// router.post("/register", upload.single("profileImage"), register);
+router.post("/register", register);
 
 router.post("/login", login);
 

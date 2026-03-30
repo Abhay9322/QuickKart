@@ -5,71 +5,93 @@ const nodemailer = require("nodemailer");
 const { generateAccessToken, generateRefreshToken } = require("../utils/generateToken")
 const User = require("../models/user.model");
 const emailQueue = require("../queues/email.queue");
+const ApiError = require("../utils/api-error");
+const ApiResponse = require("../utils/api-response");
+const { asyncHandler } = require("../utils/async-handler")
 
 
-const register = async (req, res) => {
-    try {
-        console.log("Inside register api controller");
+// const register = async (req, res) => {
+//     try {
+//         console.log("Inside register api controller");
 
-        const { name, email, password, phone, role } = req.body;
-        console.log("BODY:", req.body);
-
-
-
-        // const profileImage = req.file ? req.file.path : null;
-        // console.log("ProfileImage url :", profileImage);
+//         const { name, email, password, phone, role } = req.body;
+//         console.log("BODY:", req.body);
 
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: "Required fields are missing" })
-        }
-        const existingUser = await User.findOne({
-            email
+
+//         // const profileImage = req.file ? req.file.path : null;
+//         // console.log("ProfileImage url :", profileImage);
+
+
+//         if (!name || !email || !password) {
+//             return res.status(400).json({ message: "Required fields are missing" })
+//         }
+//         const existingUser = await User.findOne({
+//             email
+//         })
+
+//         if (existingUser) {
+//             return res.status(409).json({ message: "User already registred" })
+//         }
+
+//         if (password.length < 6) {
+//             return res.status(400).json({ message: "Password must be at least 6 characters" })
+//         }
+
+//         const hashedPassword = await bcrypt.hash(password, 10)
+//         const user = await User.create({
+//             name,
+//             email,
+//             password: hashedPassword,
+//             phone,
+//             role,
+//             // profileImage
+//         });
+
+//         const token = crypto.randomBytes(32).toString("hex");
+
+//         user.emailVerificationToken = token;
+//         user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
+
+//         await user.save();
+
+//         const verifyURL = `http://localhost:5000/api/auth/verify-email/${token}`;
+
+//         const message = `<h2>Email Verification</h2>
+//                          <a href="${verifyURL}">Click to Verify Email</a>`;
+
+//         await emailQueue.add({
+//             email: user.email,
+//             subject: "Verify Your Email",
+//             message: message
+//         })
+//         res.send({ message: "Verification email sent" })
+
+//     } catch (error) {
+//         console.log("Error is:", error);
+
+//         return res.status(500).json({ message: "Internal server error" })
+//     }
+// };
+
+const register = asyncHandler(async (req, res) => {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Required fields are necessary"
         })
-
-        if (existingUser) {
-            return res.status(409).json({ message: "User already registred" })
-        }
-
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password must be at least 6 characters" })
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10)
-        const user = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            phone,
-            role,
-            // profileImage
-        });
-
-        const token = crypto.randomBytes(32).toString("hex");
-
-        user.emailVerificationToken = token;
-        user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
-
-        await user.save();
-
-        const verifyURL = `http://localhost:5000/api/auth/verify-email/${token}`;
-
-        const message = `<h2>Email Verification</h2>
-                         <a href="${verifyURL}">Click to Verify Email</a>`;
-
-        await emailQueue.add({
-            email: user.email,
-            subject: "Verify Your Email",
-            message: message
-        })
-        res.send({ message: "Verification email sent" })
-
-    } catch (error) {
-        console.log("Error is:", error);
-
-        return res.status(500).json({ message: "Internal server error" })
     }
-};
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 201,
+            message: "User registred successfully",
+            data: {}
+        })
+    )
+})
 
 const login = async (req, res) => {
     try {
@@ -80,7 +102,6 @@ const login = async (req, res) => {
         }
 
         const user = await User.findOne({ email })
-
         if (!user.isEmailVerified) {
             return res.status(401).json({
                 message: "Please verify email first"

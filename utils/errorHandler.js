@@ -1,33 +1,9 @@
 const errorHandler = (err, req, res, next) => {
-    let statusCode = err.statusCode || 500;
-    let message = err.message || "Inernal Server Error";
-
-    if (err.name === "CastError") {
-        statusCode = 400;
-        message = "Invalid ID";
-    }
-
-    if (err.code === 11000) {
-        statusCode = 400;
-        message = "Duplicate field value";
-    }
-
-    if (err.name === "JsonWebTokenError") {
-        statusCode = 401;
-        message = "Invalid token"
-    }
-
-    if (err.name === "TokenExpiredError") {
-        statusCode = 401;
-        message = "Token expired";
-    }
-
-    res.status(statusCode).json({
+    res.status(err.statusCode || 500).json({
         success: false,
-        message,
-        errors: err.errors || [],
-        ...(process.env.NODE_ENV === "development" && { stack: err.stack })
-    });
-};
+        message: err.message || "Something went wrong",
+        errors: err.errors || []
+    })
+}
 
-module.exports = errorHandler;
+module.exports = errorHandler

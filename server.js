@@ -10,6 +10,7 @@ const userRoute = require("./routes/user.routes");
 const productRoute = require("./routes/product.route");
 const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
+const errorHandler = require("./utils/errorHandler")
 
 const connectDB = require("./db/db");
 
@@ -27,6 +28,8 @@ app.use("/api/v1/products", productRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/orders", orderRoute);
 app.use("/api/v1/categories", categoryRoute);
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 5000;
 

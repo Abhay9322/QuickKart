@@ -4,6 +4,9 @@ const router = express.Router();
 const upload = require("../middlewares/upload");
 const isLoggedIn = require("../middlewares/auth.middleware");
 
+const { userRegistrationValidator, userLoginValidator } = require("../validators/index")
+const validate = require("../middlewares/validator.middleware")
+
 const {
     register,
     login,
@@ -16,9 +19,9 @@ const {
 } = require("../controllers/auth.controller");
 
 // router.post("/register", upload.single("profileImage"), register);
-router.post("/register", register);
+router.post("/register", userRegistrationValidator(), validate, register);
 
-router.post("/login", login);
+router.post("/login", userLoginValidator(), validate, login);
 
 router.post("/forgot-password", forgotPassword);
 

@@ -4,12 +4,7 @@ class ApiResponse {
         this.statusCode = statusCode;
         this.message = message;
         this.data = data;
-        this.error = null
-    }
-
-    send(res) {
-        return res.status(this.statusCode).json(this);
     }
 }
 
-module.exports = ApiResponse;
+module.exports = ApiResponse

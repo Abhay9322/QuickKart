@@ -10,6 +10,8 @@ const userRoute = require("./routes/user.routes");
 const productRoute = require("./routes/product.route");
 const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
+const healthRoute = require("./routes/health.routes")
+
 const errorHandler = require("./utils/errorHandler")
 
 const connectDB = require("./db/db");
@@ -28,6 +30,7 @@ app.use("/api/v1/products", productRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/orders", orderRoute);
 app.use("/api/v1/categories", categoryRoute);
+app.use("/api/v1/healthCheck", healthRoute);
 
 app.use(errorHandler)
 

@@ -7,178 +7,164 @@ const User = require("../models/user.model");
 const emailQueue = require("../queues/email.queue");
 const ApiError = require("../utils/api-error");
 const ApiResponse = require("../utils/api-response");
-const { asyncHandler } = require("../utils/async-handler")
+const asyncHandler = require("../utils/async-handler");
 
-
-// const register = async (req, res) => {
-//     try {
-//         console.log("Inside register api controller");
-
-//         const { name, email, password, phone, role } = req.body;
-//         console.log("BODY:", req.body);
-
-
-
-//         // const profileImage = req.file ? req.file.path : null;
-//         // console.log("ProfileImage url :", profileImage);
-
-
-//         if (!name || !email || !password) {
-//             return res.status(400).json({ message: "Required fields are missing" })
-//         }
-//         const existingUser = await User.findOne({
-//             email
-//         })
-
-//         if (existingUser) {
-//             return res.status(409).json({ message: "User already registred" })
-//         }
-
-//         if (password.length < 6) {
-//             return res.status(400).json({ message: "Password must be at least 6 characters" })
-//         }
-
-//         const hashedPassword = await bcrypt.hash(password, 10)
-//         const user = await User.create({
-//             name,
-//             email,
-//             password: hashedPassword,
-//             phone,
-//             role,
-//             // profileImage
-//         });
-
-//         const token = crypto.randomBytes(32).toString("hex");
-
-//         user.emailVerificationToken = token;
-//         user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
-
-//         await user.save();
-
-//         const verifyURL = `http://localhost:5000/api/auth/verify-email/${token}`;
-
-//         const message = `<h2>Email Verification</h2>
-//                          <a href="${verifyURL}">Click to Verify Email</a>`;
-
-//         await emailQueue.add({
-//             email: user.email,
-//             subject: "Verify Your Email",
-//             message: message
-//         })
-//         res.send({ message: "Verification email sent" })
-
-//     } catch (error) {
-//         console.log("Error is:", error);
-
-//         return res.status(500).json({ message: "Internal server error" })
-//     }
-// };
 
 const register = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone, role } = req.body;
 
-    if (!name || !email || !password) {
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+        throw new ApiError({
+            statusCode: 409,
+            message: "User already registered"
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        phone,
+        role
+    });
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    user.emailVerificationToken = token;
+    user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    const verifyURL = `${process.env.BASE_URL}/api/auth/verify-email/${token}`;
+
+    const message = `
+        <h2>Email Verification</h2>
+        <p>Click below link to verify your email:</p>
+        <a href="${verifyURL}">Verify Email</a>
+    `;
+
+    await emailQueue.add({
+        email: user.email,
+        subject: "Verify Your Email",
+        message
+    });
+
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
+            message: "Verification email sent successfully"
+        })
+    );
+});
+
+
+const login = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
         throw new ApiError({
             statusCode: 400,
-            message: "Required fields are necessary"
-        })
+            message: "Invalid Email or Password"
+        });
     }
+
+    if (!user.isEmailVerified) {
+        throw new ApiError({
+            statusCode: 401,
+            message: "Please verify email first"
+        });
+    }
+
+    if (user.isBlocked) {
+        throw new ApiError({
+            statusCode: 403,
+            message: "Your account is blocked by admin"
+        });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Invalid Email or Password"
+        });
+    }
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.cookie("Token", accessToken, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+    });
 
     return res.status(200).json(
         new ApiResponse({
-            statusCode: 201,
-            message: "User registred successfully",
-            data: {}
-        })
-    )
-})
-
-const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ message: "Required fields are missing" })
-        }
-
-        const user = await User.findOne({ email })
-        if (!user.isEmailVerified) {
-            return res.status(401).json({
-                message: "Please verify email first"
-            });
-        }
-
-        if (user.isBlocked) {
-            return res.status(403).json({
-                message: "Your account is blocked by admin"
-            });
-        }
-
-        if (!user) {
-            return res.status(400).json({ message: "Invalid Email or Password" })
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password)
-
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid Email or Password" })
-        }
-
-        // const token = generateAccessToken(user);
-        const accessToken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
-
-        // Save refresh token in DB
-        user.refreshToken = refreshToken;
-        await user.save();
-
-        res.cookie("Token", accessToken, {
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000
-        })
-
-        res.status(200).json({
-            message: "User logged in successfully", accessToken,
-            user: {
-                id: user._id,
+            statusCode: 200,
+            message: "User logged in successfully",
+            data: {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                accessToken: accessToken,
-                refreshToken: refreshToken
+                accessToken,
+                refreshToken
             }
         })
-    } catch (error) {
-        console.log("Error occured while logging", error);
-        return res.status(500).json({ message: "Internal server while login" })
+    );
+});
 
-    }
-};
-
-const refreshAccessToken = async (req, res) => {
+const refreshAccessToken = asyncHandler(async (req, res) => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-        return res.status(401).json({ message: "No refresh token" });
+        throw new ApiError({
+            statusCode: 401,
+            message: "No refresh token"
+        });
     }
 
-    // Check in DB
     const user = await User.findOne({ refreshToken });
 
     if (!user) {
-        return res.status(403).json({ message: "Invalid refresh token" });
+        throw new ApiError({
+            statusCode: 403,
+            message: "Invalid refresh token"
+        });
     }
 
-    jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ message: "Expired refresh token" });
-        }
+    try {
+        jwt.verify(refreshToken, process.env.REFRESH_SECRET);
 
         const newAccessToken = generateAccessToken(user);
 
-        res.json({ accessToken: newAccessToken });
-    });
-};
+        return res.status(200).json(
+            new ApiResponse({
+                statusCode: 200,
+                message: "Access token refreshed successfully",
+                data: {
+                    accessToken: newAccessToken
+                }
+            })
+        );
+
+    } catch (error) {
+        throw new ApiError({
+            statusCode: 403,
+            message: "Expired or invalid refresh token"
+        });
+    }
+});
+
 
 const logout = async (req, res) => {
     try {

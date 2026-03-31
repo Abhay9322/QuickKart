@@ -1,4 +1,5 @@
 const express = require("express");
+
 const {
     createProdcut,
     updateProduct,
@@ -15,16 +16,20 @@ const {
     getLowStockProducts
 } = require("../controllers/product.controller");
 
+const validate = require("../middlewares/validator.middleware");
+const { productCreateValidator, productIdValidator } = require("../validators/index")
+
+
 const upload = require("../middlewares/upload");
 
 const router = express.Router();
 
 
-router.post("/", upload.array("images", 5), createProdcut);
+router.post("/", productCreateValidator(), validate, upload.array("images", 5), createProdcut);
 
 router.get("/", getProducts);
 
-router.get("/:id", getProductById);
+router.get("/:id", productIdValidator(), validate, getProductById);
 
 router.get("/search/name", getProductByName);
 
@@ -36,13 +41,13 @@ router.get("/featured", getFeaturedProducts);
 
 router.get("/trending", getTrendingProducts);
 
-router.put("/:id", updateProduct);
+router.put("/:id", productIdValidator(), validate, updateProduct);
 
-router.delete("/:id", deleteProduct);
+router.delete("/:id", productIdValidator(), validate, deleteProduct);
 
-router.get("/:id/stock", getProductStock);
+router.get("/:id/stock", productIdValidator(), validate, getProductStock);
 
-router.put("/:id/stock", updateStock);
+router.put("/:id/stock", productIdValidator(), validate, updateStock);
 
 router.get("/stock/low", getLowStockProducts);
 

@@ -1,11 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const upload = require("../middlewares/upload");
+const upload = require("../middlewares/upload.middleware");
 const isLoggedIn = require("../middlewares/auth.middleware");
-
-const { validate } = require("../middlewares/validator.middleware");
-const { userIdValidator } = require("../validators/index")
 
 const {
     getProfile,

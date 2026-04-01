@@ -45,6 +45,7 @@ const register = asyncHandler(async (req, res) => {
         <h2>Email Verification</h2>
         <p>Click below link to verify your email:</p>
         <a href="${verifyURL}">Verify Email</a>
+        token is : ${token}
     `;
 
     await emailQueue.add({
@@ -166,235 +167,192 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 
-const logout = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const user = await User.findById({ userId });
+const logout = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
 
-        if (!user) {
-            return res.status(400).json({
-                success: true,
-                message: "User not found"
-            })
-        }
+    const user = await User.findById(userId);
 
-        user.refreshToken = null;
-        await user.save()
-
-        return res.status(200).json({
-            success: true,
-            message: "User logout successfully"
-        })
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        })
-    }
-}
-
-const forgotPassword = async (req, res) => {
-    console.log("Inside forgotPassword controller");
-
-    try {
-        const { email } = req.body;
-
-        if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email is required"
-            });
-        }
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-
-        const resetToken = crypto.randomBytes(32).toString("hex");
-
-        const hashedToken = crypto
-            .createHash("sha256")
-            .update(resetToken)
-            .digest("hex");
-
-        user.resetPasswordToken = hashedToken;
-        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
-
-        const newUser = await user.save();
-        console.log("newUser is :", newUser);
-
-
-
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
-
-
-        await transporter.sendMail({
-            to: user.email,
-            subject: "Password Reset Request",
-            html: `
-                <h3>Password Reset</h3>
-                <p>Click below link to reset password:</p>
-                <a href="${resetUrl}">${resetUrl}</a>
-            `
+    if (!user) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "User not found"
         });
+    }
+
+    user.refreshToken = null;
+    await user.save({ validateBeforeSave: false });
+
+    res.clearCookie("Token");
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "User logged out successfully"
+        })
+    );
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "User not found"
+        });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+    await user.save({ validateBeforeSave: false });
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        secure: false,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    });
 
 
-        return res.status(200).json({
-            success: true,
+    await transporter.sendMail({
+        to: user.email,
+        subject: "Password Reset Request",
+        html: `
+            <h3>Password Reset</h3>
+            <p>Click below link to reset password:</p>
+            <a href="${resetUrl}">${resetUrl}</a>
+        `
+    });
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             message: "Reset link sent to email"
-        });
+        })
+    );
+});
 
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
+const resetPassword = asyncHandler(async (req, res) => {
+    console.log("Inside resetPassword controller");
+
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    const user = await User.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Invalid or expired token"
         });
     }
-};
 
-const resetPassword = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const { password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Password is required"
-            });
-        }
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
 
-        const hashedToken = crypto
-            .createHash("sha256")
-            .update(token)
-            .digest("hex");
+    await user.save({ validateBeforeSave: false });
 
-        const user = await User.findOne({
-            resetPasswordToken: hashedToken,
-            resetPasswordExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid or expired token"
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
-
-        user.resetPasswordExpire = undefined;
-        user.resetPasswordToken = undefined;
-
-        await user.save();
-
-        return res.status(200).json({
-            success: true,
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             message: "Password reset successfully"
-        });
+        })
+    );
+});
 
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
+
+const changePassword = asyncHandler(async (req, res) => {
+    console.log("Inside changePassword controller");
+
+    const { password, newPassword } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "User not found"
         });
     }
-};
 
-const changePassword = async (req, res) => {
-    try {
-        const { password, newPassword } = req.body;
+    const isMatch = await bcrypt.compare(password, user.password);
 
-        if (!password || !newPassword) {
-            return res.status(400).json({
-                success: false,
-                message: "Password and newPassword are required"
-            });
-        }
+    if (!isMatch) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Current password is incorrect"
+        });
+    }
 
-        const user = await User.findById(req.user._id);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        const isMatch = await bcrypt.compare(password, user.password);
+    user.password = hashedPassword;
 
-        if (!isMatch) {
-            return res.status(400).json({
-                success: false,
-                message: "Current password is incorrect"
-            });
-        }
+    await user.save({ validateBeforeSave: false });
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
-
-        await user.save();
-
-
-
-        return res.status(200).json({
-            success: true,
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             message: "Password changed successfully"
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
-};
-
-const verifyEmail = async (req, res) => {
-    try {
-        console.log("Inside verifyEmail Controller function");
-
-        const token = req.params.token;
-
-        console.log("Token is", token);
+        })
+    );
+});
 
 
-        const user = await User.findOne({
-            emailVerificationToken: token,
-            emailVerificationExpire: { $gt: Date.now() }
-        });
+const verifyEmail = asyncHandler(async (req, res) => {
+    const { token } = req.params;
 
-        console.log("User", user);
+    const user = await User.findOne({
+        emailVerificationToken: token,
+        emailVerificationExpire: { $gt: Date.now() }
+    });
 
-
-        if (!user) {
-            return res.status(400).json({
-                message: "Token Invalid or Expired"
-            });
-        }
-
-        user.isEmailVerified = true;
-        user.emailVerificationToken = undefined;
-        user.emailVerificationExpire = undefined;
-
-
-
-
-        await user.save();
-        console.log("isEmailVerified:", user.isEmailVerified);
-
-        res.status(200).json({
-            success: true,
-            message: "Email Verified Successfully"
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
+    if (!user) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Token invalid or expired"
         });
     }
-}
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "Email verified successfully"
+        })
+    );
+});
 
 module.exports = {
     register,

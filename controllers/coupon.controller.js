@@ -1,144 +1,132 @@
 const Coupon = require("../models/coupon.model");
+const ApiError = require("../utils/api-error");
+const ApiResponse = require("../utils/api-response");
+const asyncHandler = require("../utils/async-handler");
 
-const createCoupon = async (req, res) => {
-    try {
-        const { code, discount, discountType, minAmount, isActive, expiryTime } = req.body;
+const createCoupon = asyncHandler(async (req, res) => {
 
-        // Validation
-        if (!code || discount == null || !discountType || minAmount == null) {
-            return res.status(400).json({
-                success: false,
-                message: "Required fields are necessary"
-            });
-        }
+    const { code, discount, discountType, minAmount, isActive, expiryTime } = req.body;
 
-        // Check duplicate
-        const existingCoupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
-
-        if (existingCoupon) {
-            return res.status(400).json({
-                success: false,
-                message: "Coupon already exists"
-            });
-        }
-
-        // Create coupon
-        const coupon = await Coupon.create({
-            code: code.toUpperCase().trim(),
-            discount,
-            discountType,
-            minAmount,
-            isActive: isActive ?? true,
-            expiryTime
+    // Required fields validation
+    if (!code || discount == null || !discountType || minAmount == null) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Required fields are missing"
         });
+    }
 
-        res.status(201).json({
+    // Check duplicate coupon
+    const existingCoupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
+
+    if (existingCoupon) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Coupon already exists"
+        });
+    }
+
+    // Create coupon
+    const coupon = await Coupon.create({
+        code: code.toUpperCase().trim(),
+        discount,
+        discountType,
+        minAmount,
+        isActive: isActive ?? true,
+        expiryTime
+    });
+
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
             success: true,
             message: "Coupon created successfully",
-            coupon
-        });
+            data: coupon
+        })
+    );
+});
 
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message || "Internal server error"
+const applyForCoupon = asyncHandler(async (req, res) => {
+    const { code, cartTotal } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+        throw new ApiError({
+            statusCode: 401,
+            message: "Authentication is required"
         });
     }
-};
 
-const applyForCoupon = async (req, res) => {
-    try {
-        const { code, cartTotal } = req.body;
-        const userId = req.params
+    if (!code || cartTotal == null) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Required fields are missing"
+        });
+    }
 
-        // 1. Validation
-        if (!code || cartTotal == null) {
-            return res.status(400).json({
-                success: false,
-                message: "Required fields are necessary"
-            });
-        }
+    const formattedCode = code.toUpperCase().trim();
+    const coupon = await Coupon.findOne({ code: formattedCode });
 
-        const formattedCode = code.toUpperCase().trim();
+    if (!coupon) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Invalid coupon code"
+        });
+    }
 
-        // 2. Find coupon
-        const coupon = await Coupon.findOne({ code: formattedCode });
+    if (!coupon.isActive) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Coupon is not active"
+        });
+    }
 
-        if (!coupon) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid coupon code"
-            });
-        }
+    if (coupon.expiryTime && new Date() > coupon.expiryTime) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Coupon has expired"
+        });
+    }
 
-        // 3. Active check
-        if (!coupon.isActive) {
-            return res.status(400).json({
-                success: false,
-                message: "Coupon not active"
-            });
-        }
+    if (cartTotal < coupon.minAmount) {
+        throw new ApiError({
+            statusCode: 400,
+            message: `Minimum cart total should be ${coupon.minAmount}`
+        });
+    }
 
-        // 4. Expiry check
-        if (coupon.expiryTime && new Date() > coupon.expiryTime) {
-            return res.status(400).json({
-                success: false,
-                message: "Coupon expired"
-            });
-        }
+    const userUsageCount = coupon.usedBy.filter(
+        (id) => id.toString() === userId.toString()
+    ).length;
 
-        // 5. Min amount
-        if (cartTotal < coupon.minAmount) {
-            return res.status(400).json({
-                success: false,
-                message: `Minimum amount should be ${coupon.minAmount}`
-            });
-        }
+    if (coupon.usageLimitPerUser && userUsageCount >= coupon.usageLimitPerUser) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Coupon usage limit exceeded"
+        });
+    }
 
-        // 6. One-time / usage check
-        const userUsageCount = coupon.usedBy.filter(
-            (id) => id.toString() === userId.toString()
-        ).length;
+    let discount = 0;
+    if (coupon.discountType === "percentage") {
+        discount = (coupon.discount * cartTotal) / 100;
+    } else {
+        discount = coupon.discount;
+    }
 
-        if (userUsageCount >= coupon.usageLimitPerUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Coupon usage limit exceeded"
-            });
-        }
+    if (coupon.maxDiscount) {
+        discount = Math.min(discount, coupon.maxDiscount);
+    }
 
-        // 7. Calculate discount
-        let discount = 0;
+    discount = Math.min(discount, cartTotal);
+    const finalPrice = cartTotal - discount;
 
-        if (coupon.discountType === "percentage") {
-            discount = (coupon.discount * cartTotal) / 100;
-        } else {
-            discount = coupon.discount;
-        }
-
-        // 8. Max discount cap
-        if (coupon.maxDiscount) {
-            discount = Math.min(discount, coupon.maxDiscount);
-        }
-
-        // Prevent over-discount
-        discount = Math.min(discount, cartTotal);
-
-        const finalPrice = cartTotal - discount;
-
-        res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
             message: "Coupon applied successfully",
-            discount,
-            finalPrice
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message || "Internal server error"
-        });
-    }
-};
+            data: { discount, finalPrice, couponCode: formattedCode }
+        })
+    );
+});
 
 module.exports = { createCoupon, applyForCoupon };

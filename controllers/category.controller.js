@@ -1,64 +1,63 @@
 const Category = require("../models/category.model");
+const ApiError = require("../utils/api-error");
+const ApiResponse = require("../utils/api-response");
+const asyncHandler = require("../utils/async-handler");
 
-const createCategory = async (req, res) => {
-    try {
-        console.log("Inside createCategory controller function");
+const createCategory = asyncHandler(async (req, res) => {
 
-        const { name } = req.body;
+    console.log("Inside createCategory controller function");
 
-        console.log("Name is:", name);
+    const { name } = req.body;
 
+    if (!name || name.trim() === "") {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Category name is required"
+        });
+    }
 
-        const exist = await Category.findOne({ name });
+    const exist = await Category.findOne({ name });
 
-        if (exist) {
-            return res.status(400).json({
-                message: "Category already exists"
-            });
-        }
+    if (exist) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Category already exists"
+        });
+    }
 
-        const category = await Category.create({ name });
-        console.log("Category is:", category);
+    const category = await Category.create({ name: name.trim() });
 
-
-        res.status(201).json({
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
             success: true,
             message: "Category created successfully",
-            category
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Internal server error",
+            data: category
+        })
+    );
+});
+
+
+const getCategories = asyncHandler(async (req, res) => {
+
+    const categories = await Category.find();
+
+    if (!categories || categories.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "No categories found"
         });
     }
-};
 
-
-const getCategories = async (req, res) => {
-    try {
-        const categories = await Category.find();
-
-        if (!categories) {
-            res.status(403).json({
-                success: false,
-                message: "Categories not found",
-                categories
-            });
-        }
-
-        res.status(201).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
-            message: "Categories found successfully",
-            categories
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
-    }
-};
+            message: "Categories fetched successfully",
+            data: categories
+        })
+    );
+});
 
 module.exports = {
     createCategory,

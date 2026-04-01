@@ -1,60 +1,78 @@
 const User = require("../models/user.model");
+const ApiError = require("../utils/api-error");
+const ApiResponse = require("../utils/api-response");
+const asyncHandler = require("../utils/async-handler");
 
-const blockUser = async (req, res) => {
+const blockUser = asyncHandler(async (req, res) => {
 
-    try {
-        console.log("Inside blockUser controller");
+    const userId = req.params.id;
 
-        const userId = req.params.id;
+    const user = await User.findById(userId);
 
-        const user = await User.findByIdAndUpdate(
-            userId,
-            { isBlocked: true },
-            { new: true }
-        );
+    if (!user) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "User not found"
+        });
+    }
 
-        return res.status(200).json({
+    if (user.isBlocked) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "User already blocked"
+        });
+    }
+
+    user.isBlocked = true;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
             message: "User blocked successfully",
-            user
-        });
+            data: user
+        })
+    );
+});
 
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            user
+const unblockUser = asyncHandler(async (req, res) => {
+
+    console.log("Inside unblockUser controller");
+
+    const userId = req.params.id;
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { isBlocked: false },
+        { new: true }
+    );
+
+    // user exist check
+    if (!user) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "User not found"
         });
     }
-};
 
-const unblockUser = async (req, res) => {
+    // already unblocked check
+    if (!user.isBlocked) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "User is already unblocked"
+        });
+    }
 
-    try {
-        console.log("Inside unblockUser controller");
-
-        const userId = req.params.id;
-
-        const user = await User.findByIdAndUpdate(
-            userId,
-            { isBlocked: false },
-            { new: true }
-        );
-
-        return res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
             message: "User unblocked successfully",
-            user
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            user
-        });
-    }
-};
+            data: user
+        })
+    );
+});
 
 module.exports = {
     blockUser,

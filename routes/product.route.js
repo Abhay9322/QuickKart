@@ -1,7 +1,7 @@
 const express = require("express");
 
 const {
-    createProdcut,
+    createProduct,
     updateProduct,
     deleteProduct,
     getProducts,
@@ -20,12 +20,13 @@ const validate = require("../middlewares/validator.middleware");
 const { productCreateValidator, productIdValidator } = require("../validators/index")
 
 
-const upload = require("../middlewares/upload");
+const upload = require("../middlewares/upload.middleware");
 
 const router = express.Router();
 
 
-router.post("/", productCreateValidator(), validate, upload.array("images", 5), createProdcut);
+router.post("/", upload.array("images", 5), createProduct);
+// router.post("/", productCreateValidator(), validate, upload.array("images", 5), createProduct);
 
 router.get("/", getProducts);
 

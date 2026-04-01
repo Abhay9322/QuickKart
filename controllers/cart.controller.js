@@ -1,247 +1,249 @@
 const Cart = require("../models/cart.model");
+const ApiError = require("../utils/api-error");
+const ApiResponse = require("../utils/api-response");
+const asyncHandler = require("../utils/async-handler");
 
-const addToCart = async (req, res) => {
+const addToCart = asyncHandler(async (req, res) => {
+
     console.log("Inside addToCart controller function");
 
-    const userId = req.user.id;
+    const userId = req.user?.id;
     const { productId } = req.params;
 
+    // auth check
     if (!userId) {
-        return res.status(400).json({
-            success: false,
+        throw new ApiError({
+            statusCode: 401,
             message: "Authentication is required"
-        })
+        });
     }
 
-    try {
+    // find cart
+    let cart = await Cart.findOne({ user: userId });
 
-        let cart = await Cart.findOne({ user: userId });
+    // create cart if not exist
+    if (!cart) {
+        cart = await Cart.create({
+            user: userId,
+            items: []
+        });
+    }
 
-        if (!cart) {
-            cart = await Cart.create({
-                user: userId,
-                items: []
-            });
-            console.log("User cart created successfully");
-        }
+    // check product in cart
+    const existingItem = cart.items.find(
+        (item) => item.product.toString() === productId
+    );
 
-        const product = cart.items.find(
-            (item) => item.product.toString() === productId
-        );
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.items.push({
+            product: productId,
+            quantity: 1
+        });
+    }
 
-        if (product) {
-            product.quantity += 1;
-        } else {
-            cart.items.push({
-                product: productId,
-                quantity: 1
-            });
-        }
+    await cart.save();
 
-        await cart.save();
-
-        return res.status(201).json({
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
             success: true,
             message: "Product added to cart successfully",
-            cart
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server Error"
+            data: cart
         })
-    }
-}
+    );
+});
 
-const removeFromCart = async (req, res) => {
-    const userId = req.user.id;
+const removeFromCart = asyncHandler(async (req, res) => {
+
+    const userId = req.user?.id;
     const { productId } = req.body;
 
-    try {
+    if (!userId) {
+        throw new ApiError({
+            statusCode: 401,
+            message: "Authentication is required"
+        });
+    }
 
-        let cart = await Cart.findOne({ user: userId });
+    let cart = await Cart.findOne({ user: userId });
 
-        if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: "Cart not found for user"
-            })
-        }
+    if (!cart) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Cart not found for user"
+        });
+    }
 
-        const product = cart.items.find(
-            (item) => item.product.toString() === productId
+    const product = cart.items.find(
+        (item) => item.product.toString() === productId
+    );
+
+    if (!product) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found in cart"
+        });
+    }
+
+    // decrease quantity or remove item
+    if (product.quantity > 1) {
+        product.quantity -= 1;
+    } else {
+        cart.items = cart.items.filter(
+            (item) => item.product.toString() !== productId
         );
+    }
 
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            })
-        }
+    await cart.save();
 
-        if (product.quantity > 1) {
-            product.quantity -= 1;
-        } else {
-            cart.items = cart.items.filter(
-                (item) => item.product.toString() !== productId
-            );
-        }
-
-        await cart.save();
-
-        return res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
             message: "Product removed from cart successfully",
-            cart
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server Error"
+            data: cart
         })
-    }
-}
+    );
+});
 
-const updateCartQuantity = async (req, res) => {
+const updateCartQuantity = asyncHandler(async (req, res) => {
 
     console.log("Inside updateCartQuantity controller");
 
-    const userId = req.user.id;
+    const userId = req.user?.id;
     const { productId } = req.params;
     const { quantity } = req.body;
 
+    // auth check
     if (!userId) {
-        return res.status(400).json({
-            success: false,
+        throw new ApiError({
+            statusCode: 401,
             message: "Authentication is required"
         });
     }
 
-    try {
+    // quantity validation
+    if (!quantity || quantity < 1) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Quantity must be at least 1"
+        });
+    }
 
-        const cart = await Cart.findOne({ user: userId });
+    const cart = await Cart.findOne({ user: userId });
 
-        if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: "Cart not found"
-            });
-        }
+    if (!cart) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Cart not found"
+        });
+    }
 
-        const product = cart.items.find(
-            (item) => item.product.toString() === productId
-        );
+    const product = cart.items.find(
+        (item) => item.product.toString() === productId
+    );
 
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found in cart"
-            });
-        }
+    if (!product) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found in cart"
+        });
+    }
 
-        // quantity update
-        product.quantity = quantity;
+    // update quantity
+    product.quantity = quantity;
 
-        await cart.save();
+    await cart.save();
 
-        return res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
             message: "Cart quantity updated successfully",
-            cart
-        });
-
-    } catch (error) {
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-
-    }
-};
-
-const clearCart = async (req, res) => {
-    const userId = req.user.id;
-
-    if (!userId) {
-        return res.status(400).json({
-            success: false,
-            message: "Authentication is required"
+            data: cart
         })
+    );
+});
+
+const clearCart = asyncHandler(async (req, res) => {
+
+    const userId = req.user?.id;
+
+    // auth check
+    if (!userId) {
+        throw new ApiError({
+            statusCode: 401,
+            message: "Authentication is required"
+        });
     }
 
-    try {
+    const cart = await Cart.findOne({ user: userId });
 
-        let cart = await Cart.findOne({ user: userId });
+    if (!cart) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Cart not found for user"
+        });
+    }
 
-        if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: "Cart not found for user"
-            })
-        }
+    // clear all items
+    cart.items = [];
+    await cart.save();
 
-        cart.items = [];
-
-        await cart.save();
-
-        return res.status(201).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
             message: "Cart cleared successfully",
-            cart
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal server Error"
+            data: cart
         })
-    }
-}
+    );
+});
 
-const getCartTotal = async (req, res) => {
+const getCartTotal = asyncHandler(async (req, res) => {
 
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
-    try {
-
-        const cart = await Cart.findOne({ user: userId }).populate("items.product");
-
-        if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: "Cart not found"
-            });
-        }
-
-        let totalAmount = 0;
-
-        cart.items.forEach((item) => {
-
-            const price = item.product.price;   // product ka price
-            const quantity = item.quantity;     // product quantity
-
-            totalAmount += price * quantity;    // total calculation
-
+    // auth check
+    if (!userId) {
+        throw new ApiError({
+            statusCode: 401,
+            message: "Authentication is required"
         });
+    }
 
-        return res.status(200).json({
+    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+
+    if (!cart) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Cart not found"
+        });
+    }
+
+    // calculate total amount
+    let totalAmount = 0;
+
+    cart.items.forEach((item) => {
+        const price = item.product?.price || 0; // safe check
+        const quantity = item.quantity;
+        totalAmount += price * quantity;
+    });
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
-            totalAmount,
-            cart
-        });
-
-    } catch (error) {
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-
-    }
-};
+            message: "Cart fetched successfully",
+            data: {
+                cart,
+                totalAmount
+            }
+        })
+    );
+});
 
 module.exports = {
     addToCart,

@@ -65,7 +65,7 @@ const productSchema = new mongoose.Schema({
 
     returnReason: {
         type: String,
-        required: true
+        // required: true
     }
 }, { timestamps: true });
 

@@ -1,325 +1,371 @@
 const Product = require("../models/product.model")
-
-const createProdcut = async (req, res) => {
-    try {
-        const { title, description, price, featured, quantity, stock, categoryID } = req.body;
-
-        // // uploaded images ko array me convert karna
-        // const images = req.files.map(file => ({
-        //     url: file.path,        // cloudinary image url
-        //     public_id: file.filename  // cloudinary public id
-        // }));
-
-        const images = req.files?.map(file => ({
-            url: file.path,
-            public_id: file.filename
-        })) || [];
-
-        if (!title || !description || !price || !categoryID || !quantity.value || !quantity.unit) {
-            return res.status(400).json({ message: "Missing required fields" })
-        }
+const ApiError = require("../utils/api-error");
+const ApiResponse = require("../utils/api-response");
+const asyncHandler = require("../utils/async-handler");
 
 
-        const product = await Product.create({
-            title,
-            description,
-            price,
-            quantity: {
-                value: quantity.value,
-                unit: quantity.unit
-            },
-            featured: featured,
-            stock,
-            category: categoryID,
-            images: images
+
+const createProduct = asyncHandler(async (req, res) => {
+    console.log("Inside createProduct Controllers");
+
+    const { title, description, price, featured, quantity, stock, categoryID } = req.body;
+
+    if (!title || !description || !price || !categoryID || !quantity?.value || !quantity?.unit) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Missing required fields"
         });
-
-        console.log("Product added successfully:", product);
-
-        res.status(200).json({ message: "Product added successfully", })
-
-    } catch (error) {
-        console.log("Internal server error , while adding product", error);
-        return res.status(500).json({ message: "Internal server error , while adding product" })
-
     }
-}
 
-const updateProduct = async (req, res) => {
-    try {
-        console.log("Inside ModifyOrder Request");
+    const images = req.files?.map(file => ({
+        url: file.path,
+        public_id: file.filename
+    })) || [];
 
-        const { id } = req.params;
+    const product = await Product.create({
+        title,
+        description,
+        price,
+        quantity: {
+            value: quantity.value,
+            unit: quantity.unit
+        },
+        featured: featured || false,
+        stock: stock || 0,
+        category: categoryID,
+        images: images
+    });
 
-        if (!id) {
-            return res.status(400).json({ message: "productId is required" })
-        }
-
-        const updatetedProduct = await Product.findByIdAndUpdate(id, req.body, { new: true })
-
-        if (!updatetedProduct) {
-            return res.status(404).json({ message: "Product not found" })
-        }
-
-        console.log("Product Modified Successfully", updatetedProduct);
-
-        res.status(200).json({ message: "Product Modified Successfully", data: updatetedProduct })
-
-    } catch (error) {
-        console.log("Error occurred while modifing product", error);
-        return res.status(500).json({ message: "Internal Server while modifying product" })
-
-    }
-}
-
-const deleteProduct = async (req, res) => {
-    try {
-        const { id } = req.params
-
-        if (!id) {
-            return res.status(400).json({ message: "ProductId is required" })
-        }
-
-        const deletedProduct = await Product.findByIdAndDelete(id, { new: true });
-
-        if (!deletedProduct) {
-            return res.status(404).json({ message: "Product not found" })
-        }
-
-        console.log("Product deleted successfully", deletedProduct)
-
-        res.status(200).json({ message: "Product deleted successfully" })
-    } catch (error) {
-        console.log("Error occurred while deleting product", error);
-        return res.status(500).json({ message: "Internal Server while while deleting product" })
-    }
-}
-
-const getProducts = async (req, res) => {
-    try {
-        const products = await Product.find().populate('category');
-
-        if (!products) {
-            return res.status(400).json({ message: "Products not found" })
-        }
-
-        res.status(200).json({ message: "Product fetched successfully", data: products })
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server while fetching products" })
-    }
-}
-
-const getProductById = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id).populate("category");
-
-        if (!product) {
-            return res.status(400).json({ message: "Products not found" })
-        };
-
-        res.status(200).json({ message: "Product fetched successfully", data: product })
-
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server while fetching product details" })
-    }
-}
-
-const getProductByName = async (req, res) => {
-    try {
-        console.log("Inside getProductByName controller");
-
-        const { productName } = req.body;
-
-
-        if (!productName) {
-            return res.status(400).json({ message: "productName is required" })
-        }
-
-        const product = await Product.findOne({ title: { $regex: productName, $options: "i" } });
-
-        if (!product) {
-            return res.status(400).json({ message: "product not found" })
-        }
-        res.status(200).json({ message: "Product fetched successfully", data: product })
-
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server while fetching product details" })
-    }
-}
-
-const filterProducts = async (req, res) => {
-    try {
-        const { minPrice, maxPrice } = req.body;
-
-        if (!minPrice || !maxPrice) {
-            return res.status(400).json({ message: "minPrice and maxPrice are required" })
-        }
-
-        const products = await Product.find({
-            price: { $gt: minPrice, $lt: maxPrice }
-        });
-
-        res.status(200).json({ message: "Products fetched successfully", data: products })
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server while fetching products details" })
-    }
-}
-
-const getSortedProducts = async (req, res) => {
-    try {
-
-        const { sort } = req.query;
-
-        let sortOption = {};
-
-        switch (sort) {
-
-            case "priceLowHigh":
-                sortOption = { price: 1 };
-                break;
-
-            case "priceHighLow":
-                sortOption = { price: -1 };
-                break;
-
-            case "rating":
-                sortOption = { rating: -1 };
-                break;
-
-            case "newest":
-                sortOption = { createdAt: -1 };
-                break;
-
-            default:
-                sortOption = { createdAt: -1 };
-        }
-
-        const products = await Product.find().sort(sortOption);
-
-        res.status(200).json({
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
             success: true,
+            message: "Product added successfully",
+            data: product
+        })
+    );
+});
+
+const updateProduct = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "productId is required"
+        });
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, { new: true });
+
+    if (!updatedProduct) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Product updated successfully",
+            data: updatedProduct
+        })
+    );
+});
+
+const deleteProduct = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "ProductId is required"
+        });
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Product deleted successfully",
+            data: deletedProduct
+        })
+    );
+});
+
+const getProducts = asyncHandler(async (req, res) => {
+    const products = await Product.find().populate("category");
+
+    if (!products || products.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Products not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Products fetched successfully",
+            data: products
+        })
+    );
+});
+
+const getProductById = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id).populate("category");
+
+    if (!product) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Product fetched successfully",
+            data: product
+        })
+    );
+});
+
+const getProductByName = asyncHandler(async (req, res) => {
+    const { productName } = req.body;
+
+    if (!productName) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "productName is required"
+        });
+    }
+
+    const product = await Product.findOne({
+        title: { $regex: productName, $options: "i" }
+    }).populate("category");
+
+    if (!product) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Product fetched successfully",
+            data: product
+        })
+    );
+});
+
+const filterProducts = asyncHandler(async (req, res) => {
+    const { minPrice, maxPrice } = req.body;
+
+    if (minPrice == null || maxPrice == null) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "minPrice and maxPrice are required"
+        });
+    }
+
+    const products = await Product.find({
+        price: { $gt: minPrice, $lt: maxPrice }
+    }).populate("category");
+
+    if (!products || products.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "No products found in the given price range"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Products fetched successfully",
+            data: products
+        })
+    );
+});
+
+const getSortedProducts = asyncHandler(async (req, res) => {
+    const { sort } = req.query;
+
+    let sortOption = {};
+
+    switch (sort) {
+        case "priceLowHigh":
+            sortOption = { price: 1 };
+            break;
+        case "priceHighLow":
+            sortOption = { price: -1 };
+            break;
+        case "rating":
+            sortOption = { rating: -1 };
+            break;
+        case "newest":
+            sortOption = { createdAt: -1 };
+            break;
+        default:
+            sortOption = { createdAt: -1 };
+    }
+
+    const products = await Product.find().sort(sortOption).populate("category");
+
+    if (!products || products.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "No products found for the given sort option"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Products fetched and sorted successfully",
             count: products.length,
             data: products
+        })
+    );
+});
+
+const getFeaturedProducts = asyncHandler(async (req, res) => {
+    const products = await Product.find({ featured: true }).populate("category");
+
+    if (!products || products.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Featured products not found"
         });
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Server Error"
-        });
     }
-};
 
-const getFeaturedProducts = async (req, res) => {
-    try {
-        const products = await Product.find({ featured: true });
-
-        if (!products || products.length == 0) {
-            return res.status(400).json({ message: "featured products not found" })
-        }
-
-        res.status(200).json({ message: "featured products fetched successfully", data: products })
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server while fetching featured products" })
-    }
-}
-
-const getTrendingProducts = async (req, res) => {
-    try {
-        const products = await Product.find().sort({ sold: -1 }).limit(5);
-
-        if (!products) {
-            return res.status(400).json({ message: "Trending products not found" })
-        }
-        res.status(200).json({ message: "Trending products fetched successfully", data: products })
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server while fetching products" })
-    }
-}
-
-const getProductStock = async (req, res) => {
-    try {
-
-        const product = await Product.findById(req.params.id);
-
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
-        }
-
-        res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
-            stock: product.stock
+            message: "Featured products fetched successfully",
+            count: products.length,
+            data: products
+        })
+    );
+});
+
+const getTrendingProducts = asyncHandler(async (req, res) => {
+    const products = await Product.find().sort({ sold: -1 }).limit(5).populate("category");
+
+    if (!products || products.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Trending products not found"
         });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
     }
-};
 
-const updateStock = async (req, res) => {
-
-    try {
-
-        const { stock } = req.body;
-
-        const product = await Product.findByIdAndUpdate(
-            req.params.id,
-            { stock },
-            { new: true }
-        );
-
-        res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
-            message: "Stock updated",
-            product
+            message: "Trending products fetched successfully",
+            count: products.length,
+            data: products
+        })
+    );
+});
+
+const getProductStock = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found"
         });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
     }
 
-};
-
-const getLowStockProducts = async (req, res) => {
-
-    try {
-
-        const products = await Product.find({
-            stock: { $lt: 10 }
-        });
-
-        res.status(200).json({
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
             success: true,
-            products
+            message: "Product stock fetched successfully",
+            data: { stock: product.stock }
+        })
+    );
+});
+
+const updateStock = asyncHandler(async (req, res) => {
+    const { stock } = req.body;
+
+    if (stock == null) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Stock value is required"
         });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
     }
 
-};
+    const product = await Product.findByIdAndUpdate(
+        req.params.id,
+        { stock },
+        { new: true }
+    );
+
+    if (!product) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Product not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Stock updated successfully",
+            data: product
+        })
+    );
+});
+
+const getLowStockProducts = asyncHandler(async (req, res) => {
+    const products = await Product.find({ stock: { $lt: 10 } });
+
+    if (!products || products.length === 0) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "No low stock products found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Low stock products fetched successfully",
+            data: products
+        })
+    );
+});
 
 
 module.exports = {
-    createProdcut,
+    createProduct,
     updateProduct,
     deleteProduct,
     getProducts,

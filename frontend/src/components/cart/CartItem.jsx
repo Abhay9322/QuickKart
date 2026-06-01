@@ -1,37 +1,57 @@
 import React from "react";
-import "./cartItem.css";
 
-const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
+const CartItem = ({ item, onIncrease, onDecrease }) => {
     return (
-        <div className="cart-item-card">
+        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-5 flex justify-between items-center gap-4 shadow-xl">
 
-            <img
-                src={item.product?.image || "https://via.placeholder.com/100"}
-                alt={item.product?.name}
-                className="cart-item-img"
-            />
+            {/* Product Info */}
+            <div className="flex items-center gap-4">
 
-            <div className="cart-item-details">
-                <h4>{item.product?.name}</h4>
-                <p className="cart-item-price">₹ {item.product?.price}</p>
+                <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-24 h-24 object-cover rounded-2xl border border-white/10"
+                />
+
+                <div>
+                    <h2 className="font-semibold text-white text-lg">
+                        {item.name}
+                    </h2>
+
+                    <p className="text-violet-300 text-sm">
+                        ${item.price}
+                    </p>
+                </div>
+
             </div>
 
-            <div className="cart-item-qty">
-                <button onClick={() => onDecrease(item._id, item.quantity)}>-</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => onIncrease(item._id, item.quantity)}>+</button>
+            {/* Quantity */}
+            <div className="flex items-center gap-3">
+
+                <button
+                    onClick={() => onDecrease(item.id)}
+                    className="w-10 h-10 rounded-full bg-white/10 border border-white/10 text-white hover:bg-violet-500 transition"
+                >
+                    -
+                </button>
+
+                <span className="text-white font-semibold text-lg">
+                    {item.quantity}
+                </span>
+
+                <button
+                    onClick={() => onIncrease(item.id)}
+                    className="w-10 h-10 rounded-full bg-white/10 border border-white/10 text-white hover:bg-violet-500 transition"
+                >
+                    +
+                </button>
+
             </div>
 
-            <div className="cart-item-total">
-                ₹ {item.product?.price * item.quantity}
+            {/* Total */}
+            <div className="font-bold text-xl text-white">
+                ${item.price * item.quantity}
             </div>
-
-            <button
-                className="cart-item-remove"
-                onClick={() => onRemove(item._id)}
-            >
-                ✕
-            </button>
 
         </div>
     );

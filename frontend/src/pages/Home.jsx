@@ -1,36 +1,26 @@
-import React from 'react'
-import ProductList from '../components/product/ProductList'
-import "./Home.css"
-import Hero from '../components/Hero/Hero'
+// src/pages/Home.jsx
+import React from "react";
+
+import HeroSection from "../components/home/HeroSection";
+import TopCategories from "../components/home/TopCategories";
+import TrendingProducts from "../components/home/TrendingProducts";
 
 const Home = () => {
     return (
-        <div className="home">
+        <div className="min-h-screen bg-[#050816] text-white relative overflow-hidden">
 
-            {/* HERO SECTION */}
+            <div className="absolute inset-0 bg-[radial-gradient(#312e81_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
 
-            <Hero />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-violet-600/20 blur-[180px]" />
 
-            {/* CATEGORIES */}
-            <div className="categories">
-                <h2>Shop by Category</h2>
-                <div className="category-list">
-                    <div className="category-card">Electronics</div>
-                    <div className="category-card">Fashion</div>
-                    <div className="category-card">Home</div>
-                    <div className="category-card">Beauty</div>
-                    <div className="category-card">Sports</div>
-                </div>
-            </div>
-
-            {/* PRODUCTS */}
-            <div className="products-section">
-                <h2>Latest Products</h2>
-                <ProductList />
+            <div className="relative z-10">
+                <HeroSection />
+                <TopCategories />
+                <TrendingProducts />
             </div>
 
         </div>
-    )
-}
+    );
+};
 
-export default Home
+export default Home;

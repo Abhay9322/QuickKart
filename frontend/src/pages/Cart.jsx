@@ -1,122 +1,94 @@
-import React, { useEffect, useState } from "react";
-// import CartItem from "./CartItem";
+// src/pages/Cart.jsx
+
+import React, { useState } from "react";
 import CartItem from "../components/cart/CartItem";
-import "./cart.css";
-import {
-    getCart,
-    updateCart,
-    deleteCartItem
-} from "../services/cartService";
+import CartSummary from "../components/cart/CartSummary";
 
 const Cart = () => {
+    const [cartItems, setCartItems] = useState([
+        {
+            id: 1,
+            name: "Elite Runner",
+            price: 120,
+            quantity: 1,
+            image:
+                "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
+        },
+        {
+            id: 2,
+            name: "Urban Hoodie",
+            price: 80,
+            quantity: 2,
+            image:
+                "https://images.unsplash.com/photo-1520975916090-3105956dac38",
+        },
+    ]);
 
-    const [cartItems, setCartItems] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    // Fetch cart
-    useEffect(() => {
-        const fetchCart = async () => {
-            try {
-                setLoading(true);
-                const res = await getCart();
-                setCartItems(res.data.data.items); // 👈 important
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCart();
-    }, []);
-
-    // Increase qty
-    const increaseQty = async (id, quantity) => {
-        const newQty = quantity + 1;
-
-        await updateCart(id, { quantity: newQty });
-
-        setCartItems(prev =>
-            prev.map(item =>
-                item._id === id ? { ...item, quantity: newQty } : item
+    const increaseQty = (id) => {
+        setCartItems((prev) =>
+            prev.map((item) =>
+                item.id === id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
             )
         );
     };
 
-    // Decrease qty
-    const decreaseQty = async (id, quantity) => {
-        if (quantity === 1) return;
-
-        const newQty = quantity - 1;
-
-        await updateCart(id, { quantity: newQty });
-
-        setCartItems(prev =>
-            prev.map(item =>
-                item._id === id ? { ...item, quantity: newQty } : item
+    const decreaseQty = (id) => {
+        setCartItems((prev) =>
+            prev.map((item) =>
+                item.id === id && item.quantity > 1
+                    ? { ...item, quantity: item.quantity - 1 }
+                    : item
             )
-        );
-    };
-
-    // Remove item
-    const removeItem = async (id) => {
-        await deleteCartItem(id);
-
-        setCartItems(prev =>
-            prev.filter(item => item._id !== id)
         );
     };
 
     const total = cartItems.reduce(
-        (acc, item) =>
-            acc + item.product?.price * item.quantity,
+        (acc, item) => acc + item.price * item.quantity,
         0
     );
 
-    if (loading) return <p>Loading cart...</p>;
-
     return (
-        <div className="cart-container">
+        <div className="relative min-h-screen bg-[#050816] overflow-hidden">
 
-            <h2>🛒 Your Cart</h2>
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(#312e81_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
 
-            <div className="cart-layout">
+            {/* Gradient Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-violet-600/20 blur-[150px]" />
 
-                {/* LEFT */}
-                <div className="cart-items">
-                    {cartItems.length === 0 ? (
-                        <p>Your cart is empty</p>
-                    ) : (
-                        cartItems.map(item => (
+            {/* Content */}
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+
+                {/* Heading */}
+                <div className="mb-10">
+                    <h1 className="text-4xl font-bold text-white">
+                        Shopping Cart
+                    </h1>
+
+                    <p className="text-gray-400 mt-2">
+                        Review your items before checkout.
+                    </p>
+                </div>
+
+                {/* Cart Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    {/* Cart Items */}
+                    <div className="lg:col-span-2 space-y-5">
+                        {cartItems.map((item) => (
                             <CartItem
-                                key={item._id}
+                                key={item.id}
                                 item={item}
                                 onIncrease={increaseQty}
                                 onDecrease={decreaseQty}
-                                onRemove={removeItem}
                             />
-                        ))
-                    )}
-                </div>
-
-                {/* RIGHT */}
-                <div className="cart-summary">
-
-                    <h3>Order Summary</h3>
-
-                    <div className="summary-row">
-                        <span>Total Items</span>
-                        <span>{cartItems.length}</span>
+                        ))}
                     </div>
 
-                    <div className="summary-row">
-                        <span>Total Price</span>
-                        <span>₹ {total}</span>
-                    </div>
-
-                    <button className="checkout-btn">
-                        Proceed to Checkout
-                    </button>
+                    {/* Order Summary */}
+                    <CartSummary total={total} />
 
                 </div>
 

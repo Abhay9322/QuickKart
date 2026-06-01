@@ -1,76 +1,109 @@
-import './ProductDetails.css'
-import React, { useState, useEffect } from 'react'
-import ProductCard from '../components/product/ProductCard'
-import { useParams, useNavigate } from 'react-router-dom'
-import { deleteProductById, getProductById } from '../services/productService'
+// src/pages/ProductDetails.jsx
+
+import React from "react";
 
 const ProductDetails = () => {
-
-    const { id } = useParams()
-    const navigate = useNavigate()
-
-    const [product, setProduct] = useState(null)
-    const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false)
-
-    const fetchProduct = async (id) => {
-        try {
-            setLoading(true)
-
-            const response = await getProductById(id)
-            setProduct(response.data.data)
-
-        } catch (error) {
-            console.log(error)
-            setError(error.response?.data?.message || "Error fetching product")
-
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const onDelete = async () => {
-        try {
-            const confirmDelete = window.confirm("Are you sure you want to delete this product?")
-            if (!confirmDelete) return
-
-            const res = await deleteProductById(id)
-
-            if (res.status === 200) {
-                alert("Deleted ✅")
-                navigate("/")
-            }
-
-        } catch (error) {
-            console.log(error)
-            setError(error.response?.data?.message || "Delete failed")
-        }
-    }
-
-    useEffect(() => {
-        if (id) {
-            fetchProduct(id)
-        }
-    }, [id])
+    const product = {
+        name: "ELITE Runner Pro",
+        price: 129,
+        description:
+            "Premium lightweight running shoes designed for maximum comfort, performance, and durability. Built for elite athletes and daily runners.",
+        image:
+            "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
+    };
 
     return (
-        <div className="product-details-container">
+        <div className="relative min-h-screen bg-[#050816] overflow-hidden">
 
-            {loading && <p className="loading-text">Loading product...</p>}
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(#312e81_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
 
-            {error && <p className="error-text">{error}</p>}
+            {/* Violet Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-violet-600/20 blur-[180px]" />
 
-            {product && (
-                <div className="product-grid">
-                    <ProductCard
-                        product={product}
-                        onDelete={onDelete}
-                    />
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
+
+                {/* Product Card */}
+                <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl">
+
+                    <div className="grid lg:grid-cols-2 gap-10 p-8 lg:p-12">
+
+                        {/* Product Image */}
+                        <div className="relative group">
+
+                            <div className="overflow-hidden rounded-3xl border border-white/10">
+
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-[500px] object-cover group-hover:scale-105 transition duration-500"
+                                />
+
+                            </div>
+
+                        </div>
+
+                        {/* Product Info */}
+                        <div className="flex flex-col justify-center">
+
+                            <span className="text-violet-400 tracking-[4px] text-sm uppercase">
+                                Premium Collection
+                            </span>
+
+                            <h1 className="text-4xl md:text-5xl font-bold text-white mt-3">
+                                {product.name}
+                            </h1>
+
+                            <p className="text-3xl font-bold text-white mt-5">
+                                ${product.price}
+                            </p>
+
+                            <p className="text-gray-400 leading-relaxed mt-6">
+                                {product.description}
+                            </p>
+
+                            {/* Features */}
+                            <div className="mt-8 space-y-3">
+
+                                <div className="flex items-center gap-3 text-gray-300">
+                                    <span className="text-green-400">✓</span>
+                                    Free Delivery Available
+                                </div>
+
+                                <div className="flex items-center gap-3 text-gray-300">
+                                    <span className="text-green-400">✓</span>
+                                    7-Day Return Policy
+                                </div>
+
+                                <div className="flex items-center gap-3 text-gray-300">
+                                    <span className="text-green-400">✓</span>
+                                    Premium Quality Materials
+                                </div>
+
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-4 mt-10">
+
+                                <button className="px-8 py-4 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold hover:scale-105 transition">
+                                    Add to Cart
+                                </button>
+
+                                <button className="px-8 py-4 rounded-full border border-white/10 text-white hover:bg-white/10 transition">
+                                    Buy Now
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
-            )}
 
+            </div>
         </div>
-    )
-}
+    );
+};
 
-export default ProductDetails
+export default ProductDetails;

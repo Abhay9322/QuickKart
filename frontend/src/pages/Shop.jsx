@@ -1,7 +1,7 @@
 // src/pages/Shop.jsx
 
 import React from "react";
-import ProductCard from "../components/home/ProductCard";
+import ProductCard from "../components/shop/ProductCard";
 
 const Shop = () => {
     const products = [
@@ -24,6 +24,26 @@ const Shop = () => {
                 "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500",
             description:
                 "Premium cotton hoodie for everyday comfort.",
+        },
+        {
+            id: 3,
+            name: "Smart Watch",
+            category: "Accessories",
+            price: 249,
+            image:
+                "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
+            description:
+                "Track fitness, heart rate and daily activities.",
+        },
+        {
+            id: 4,
+            name: "Training Tracksuit",
+            category: "Tracksuit",
+            price: 149,
+            image:
+                "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500",
+            description:
+                "Breathable tracksuit built for training sessions.",
         },
         {
             id: 3,

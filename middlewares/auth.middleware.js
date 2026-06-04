@@ -4,7 +4,7 @@ const User = require("../models/user.model")
 const isLoggedIn = async (req, res, next) => {
     console.log("Inside isLoggedIn middleware");
 
-    const token = req.cookies.Token;
+    const token = req.cookies.token;
     console.log("Token is:", token);
 
 

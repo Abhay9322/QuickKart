@@ -19,7 +19,8 @@ const addToCart = asyncHandler(async (req, res) => {
     }
 
     // find cart
-    let cart = await Cart.findOne({ user: userId });
+    let cart = await Cart.findOne({ user: userId })
+        .populate("items.product");
 
     // create cart if not exist
     if (!cart) {
@@ -245,10 +246,49 @@ const getCartTotal = asyncHandler(async (req, res) => {
     );
 });
 
+// GET CART ITEMS
+const getCartItems = async (req, res) => {
+
+    try {
+
+        // logged in user id
+        const userId = req.user.id;
+
+        // user ka cart find karo
+        const cart = await Cart.findOne({ user: userId })
+            .populate("items.product");
+
+        // agar cart nahi hai
+        if (!cart) {
+            return res.status(200).json({
+                success: true,
+                items: []
+            });
+        }
+
+        // cart bhejo
+        res.status(200).json({
+            success: true,
+            items: cart.items
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
+
 module.exports = {
     addToCart,
     removeFromCart,
     updateCartQuantity,
     clearCart,
-    getCartTotal
+    getCartTotal,
+    getCartItems
 };

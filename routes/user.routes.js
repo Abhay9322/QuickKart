@@ -10,7 +10,9 @@ const {
     uploadProfileImage
 } = require("../controllers/user.controller");
 
-router.get("/profile", isLoggedIn, getProfile);
+// router.get("/profile", isLoggedIn, getProfile);
+
+router.get("/profile/:id", getProfile);
 
 router.put("/profile", isLoggedIn, upload.single("profileImage"), updateProfile);
 

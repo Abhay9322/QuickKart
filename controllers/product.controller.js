@@ -105,7 +105,13 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 const getProducts = asyncHandler(async (req, res) => {
+
+    console.log("Inside getProducts route");
+
     const products = await Product.find().populate("category");
+
+    console.log("Products are: ", products);
+
 
     if (!products || products.length === 0) {
         throw new ApiError({

@@ -9,9 +9,22 @@ const ApiError = require("../utils/api-error");
 const ApiResponse = require("../utils/api-response");
 const asyncHandler = require("../utils/async-handler");
 
+const {
+    sendEmail,
+    emailVerificationMailGenContent,
+    forgotPasswordMailGenContent
+} = require("../utils/sendEmail");
+
 
 const register = asyncHandler(async (req, res) => {
     const { name, email, password, phone, role } = req.body;
+
+    if (!name || !email || !password || !phone) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Required fields are neccessary"
+        });
+    }
 
     const existingUser = await User.findOne({ email });
 
@@ -29,35 +42,54 @@ const register = asyncHandler(async (req, res) => {
         email,
         password: hashedPassword,
         phone,
-        role
+        role: "User"
     });
 
-    const token = crypto.randomBytes(32).toString("hex");
+    // const token = crypto.randomBytes(32).toString("hex");
 
-    user.emailVerificationToken = token;
-    user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
+    // user.emailVerificationToken = token;
+    // user.emailVerificationExpire = Date.now() + 10 * 60 * 1000;
 
     await user.save();
 
-    const verifyURL = `${process.env.BASE_URL}/api/auth/verify-email/${token}`;
+    // const verifyURL = `${process.env.BASE_URL}/api/auth/verify-email/${token}`;
 
-    const message = `
-        <h2>Email Verification</h2>
-        <p>Click below link to verify your email:</p>
-        <a href="${verifyURL}">Verify Email</a>
-        token is : ${token}
-    `;
+    // const message = `
+    //     <h2>Email Verification</h2>
+    //     <p>Click below link to verify your email:</p>
+    //     <a href="${verifyURL}">Verify Email</a>
+    //     // token is : ${token}
+    // `;
 
-    await emailQueue.add({
-        email: user.email,
-        subject: "Verify Your Email",
-        message
-    });
+    // await emailQueue.add({
+    //     email: user.email,
+    //     subject: "Verify Your Email",
+    //     message
+    // });
 
+    // const emailResult = sendEmail({
+    //     email: user.email,
+    //     subject: user.subject,
+    //     message: "Click below link to verify your email:",
+    //     mailGenContent: emailVerificationMailGenContent(user.name, verifyURL)
+    // })
+
+    // console.log("emailResult is:", emailResult);
+
+
+    // return res.status(201).json(
+    //     new ApiResponse({
+    //         statusCode: 201,
+    //         message: "Verification email sent successfully"
+    //     })
+    // );
+
+
+    // *************************************** Temp ********************
     return res.status(201).json(
         new ApiResponse({
             statusCode: 201,
-            message: "Verification email sent successfully"
+            message: "User registred successfully"
         })
     );
 });
@@ -75,19 +107,19 @@ const login = asyncHandler(async (req, res) => {
         });
     }
 
-    if (!user.isEmailVerified) {
-        throw new ApiError({
-            statusCode: 401,
-            message: "Please verify email first"
-        });
-    }
+    // if (!user.isEmailVerified) {
+    //     throw new ApiError({
+    //         statusCode: 401,
+    //         message: "Please verify email first"
+    //     });
+    // }
 
-    if (user.isBlocked) {
-        throw new ApiError({
-            statusCode: 403,
-            message: "Your account is blocked by admin"
-        });
-    }
+    // if (user.isBlocked) {
+    //     throw new ApiError({
+    //         statusCode: 403,
+    //         message: "Your account is blocked by admin"
+    //     });
+    // }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
@@ -104,8 +136,10 @@ const login = asyncHandler(async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie("Token", accessToken, {
+    res.cookie("token", accessToken, {
         httpOnly: true,
+        secure: false,       // local me false
+        sameSite: "lax",     // 🔥 IMPORTANT
         maxAge: 24 * 60 * 60 * 1000
     });
 
@@ -182,7 +216,11 @@ const logout = asyncHandler(async (req, res) => {
     user.refreshToken = null;
     await user.save({ validateBeforeSave: false });
 
-    res.clearCookie("Token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false
+    });
 
     return res.status(200).json(
         new ApiResponse({
@@ -218,26 +256,35 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: false,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-    });
+    // const transporter = nodemailer.createTransport({
+    //     host: process.env.SMTP_HOST,
+    //     port: Number(process.env.SMTP_PORT),
+    //     secure: false,
+    //     auth: {
+    //         user: process.env.SMTP_USER,
+    //         pass: process.env.SMTP_PASS,
+    //     },
+    // });
 
 
-    await transporter.sendMail({
-        to: user.email,
-        subject: "Password Reset Request",
-        html: `
-            <h3>Password Reset</h3>
-            <p>Click below link to reset password:</p>
-            <a href="${resetUrl}">${resetUrl}</a>
-        `
-    });
+    // await transporter.sendMail({
+    //     to: user.email,
+    //     subject: "Password Reset Request",
+    //     html: `
+    //         <h3>Password Reset</h3>
+    //         <p>Click below link to reset password:</p>
+    //         <a href="${resetUrl}">${resetUrl}</a>
+    //     `
+    // });
+
+    const emailResult = sendEmail({
+        email: user.email,
+        subject: "Reset your password",
+        message: "Click below link to reset your password:",
+        mailGenContent: forgotPasswordMailGenContent(user.name, resetUrl)
+    })
+
+    console.log("EmailResult is:", emailResult);
 
     return res.status(200).json(
         new ApiResponse({

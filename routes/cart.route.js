@@ -5,7 +5,8 @@ const {
     removeFromCart,
     updateCartQuantity,
     clearCart,
-    getCartTotal
+    getCartTotal,
+    getCartItems
 } = require("../controllers/cart.controller");
 
 const validate = require("../middlewares/validator.middleware");
@@ -15,7 +16,10 @@ const isLoggedIn = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
-router.post("/:productId", addToCartValidator(), validate, isLoggedIn, addToCart);
+router.post("/:productId", isLoggedIn, addToCart);
+router.get("/", isLoggedIn, getCartItems);
+router.get("/", getCartItems);
+// router.post("/:productId", addToCartValidator(), validate, isLoggedIn, addToCart);
 
 router.delete("/:productId", removeFromCartValidator(), validate, validate, isLoggedIn, removeFromCart);
 

@@ -7,18 +7,24 @@ const asyncHandler = require("../utils/async-handler");
 
 
 const getProfile = asyncHandler(async (req, res) => {
-    const token = req.cookies?.Token;
 
-    if (!token) {
-        throw new ApiError({
-            statusCode: 400,
-            message: "Token not found"
-        });
-    }
+    console.log("Inside getProfile Controller");
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // const token = req.cookies?.Token;
+    const userId = req.params.id
 
-    const user = await User.findById(decoded.id).select("-password");
+    // if (!token) {
+    //     throw new ApiError({
+    //         statusCode: 400,
+    //         message: "Token not found"
+    //     });
+    // }
+
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    // const user = await User.findById(decoded.id).select("-password");
+
+    const user = await User.findById(userId)
 
     if (!user) {
         throw new ApiError({

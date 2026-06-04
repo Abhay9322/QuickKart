@@ -1,36 +1,7 @@
-const nodemailer = require("nodemailer");
-const Mailgen = require('mailgen');
+import Mailgen from "mailgen";
+import nodemailer from "nodemailer";
 
-
-// const sendEmail = async (email, subject, message) => {
-//     try {
-
-//         const transporter = nodemailer.createTransport({
-//             host: process.env.SMTP_HOST,
-//             port: Number(process.env.SMTP_PORT),
-//             secure: false,
-//             auth: {
-//                 user: process.env.SMTP_USER,
-//                 pass: process.env.SMTP_PASS,
-//             },
-//         });
-
-//         const info = await transporter.sendMail({
-//             from: '"My App" <test@mail.com>',
-//             to: email,
-//             subject: subject,
-//             html: message
-//         });
-
-//         console.log("✅ Email Sent:", info.messageId);
-
-//     } catch (error) {
-//         console.log("❌ Email Error:", error);
-//     }
-// };
-
-
-const sendEmail = async (options) => {
+const sendMail = async (options) => {
 
     const mailGenerator = new Mailgen({
         theme: 'default',
@@ -45,17 +16,17 @@ const sendEmail = async (options) => {
     const emailText = mailGenerator.generatePlaintext(options.mailGenContent);
 
 
+
     // Create a transporter using SMTP
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
+        host: "smtp.example.com",
+        port: 587,
         secure: false, // use STARTTLS (upgrade connection to TLS after connecting)
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
         },
     });
-
 
     const mail = {
         from: "team@example.com", // sender address
@@ -72,11 +43,6 @@ const sendEmail = async (options) => {
     }
 }
 
-// {
-//     email: "abhi@gmail.com"
-//     subject: "hdjolala",
-//         mailGenContent
-// }
 
 const forgotPasswordMailGenContent = (username, passwordResetUrl) => {
     return {
@@ -99,7 +65,7 @@ const emailVerificationMailGenContent = (username, verificationUrl) => {
     return {
         body: {
             name: username,
-            intro: 'Welcome to our ecommerce application.',
+            intro: 'Welcome to Mailgen! We\'re very excited to have you on board.',
             action: {
                 instructions: 'To get started with our App, please click here:',
                 button: {
@@ -108,14 +74,7 @@ const emailVerificationMailGenContent = (username, verificationUrl) => {
                     link: verificationUrl
                 }
             },
-            outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.',
-            text: verificationUrl,
+            outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
         }
     }
-}
-
-module.exports = {
-    sendEmail,
-    forgotPasswordMailGenContent,
-    emailVerificationMailGenContent
 }

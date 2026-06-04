@@ -1,71 +1,45 @@
 // src/pages/Shop.jsx
 
-import React from "react";
+import React, { useEffectEvent } from "react";
 import ProductCard from "../components/shop/ProductCard";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const Shop = () => {
-    const products = [
-        {
-            id: 1,
-            name: "Elite Runner Pro",
-            category: "Shoes",
-            price: 129,
-            image:
-                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
-            description:
-                "Premium lightweight running shoes for maximum comfort.",
-        },
-        {
-            id: 2,
-            name: "Urban Hoodie",
-            category: "Hoodies",
-            price: 89,
-            image:
-                "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500",
-            description:
-                "Premium cotton hoodie for everyday comfort.",
-        },
-        {
-            id: 3,
-            name: "Smart Watch",
-            category: "Accessories",
-            price: 249,
-            image:
-                "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-            description:
-                "Track fitness, heart rate and daily activities.",
-        },
-        {
-            id: 4,
-            name: "Training Tracksuit",
-            category: "Tracksuit",
-            price: 149,
-            image:
-                "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500",
-            description:
-                "Breathable tracksuit built for training sessions.",
-        },
-        {
-            id: 3,
-            name: "Smart Watch",
-            category: "Accessories",
-            price: 249,
-            image:
-                "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-            description:
-                "Track fitness, heart rate and daily activities.",
-        },
-        {
-            id: 4,
-            name: "Training Tracksuit",
-            category: "Tracksuit",
-            price: 149,
-            image:
-                "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500",
-            description:
-                "Breathable tracksuit built for training sessions.",
-        },
-    ];
+
+    const [products, setProducts] = useState([])
+
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/v1/products", { withCredentials: true })
+            console.log("Products fetched succesfully", response?.data);
+            const data = response.data
+            setProducts(data.data)
+
+        } catch (error) {
+            console.log(error.response.data);
+
+        }
+    }
+    const onAddToCart = async (productId) => {
+
+        try {
+            const response = await axios.post(`http://localhost:5000/api/v1/cart/${productId}`, {}, { withCredentials: true })
+            console.log("Item added to cart succesfully", response);
+
+            alert("Item added to cart succesfully")
+
+        } catch (error) {
+            console.log(error.response.data);
+
+        }
+    }
+
+
+
+    useEffect(() => {
+        fetchProducts()
+    }, [])
 
     return (
         <div className="relative min-h-screen bg-[#050816] overflow-hidden">
@@ -98,8 +72,9 @@ const Shop = () => {
 
                     {products.map((product) => (
                         <ProductCard
-                            key={product.id}
+                            key={product._id}
                             product={product}
+                            onAddToCart={() => onAddToCart(product._id)}
                         />
                     ))}
 

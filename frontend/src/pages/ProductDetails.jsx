@@ -1,17 +1,40 @@
 // src/pages/ProductDetails.jsx
 
 import React from "react";
+import ProductCard from "../components/shop/ProductCard";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const ProductDetails = () => {
-    const product = {
-        name: "ELITE Runner Pro",
-        price: 129,
-        description:
-            "Premium lightweight running shoes designed for maximum comfort, performance, and durability. Built for elite athletes and daily runners.",
-        image:
-            "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
-    };
+    // const product = {
+    //     name: "ELITE Runner Pro",
+    //     price: 129,
+    //     description:
+    //         "Premium lightweight running shoes designed for maximum comfort, performance, and durability. Built for elite athletes and daily runners.",
+    //     image:
+    //         "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
+    // };
 
+    const [product, setProduct] = useState([])
+
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/v1/products/69ecd44f885dbe18853bf792")
+            console.log("Products fetched succesfully", response?.data);
+            const data = response.data
+            setProduct(data.data)
+
+            alert("Products fetched successfully")
+
+        } catch (error) {
+            console.log(error.response.data);
+
+        }
+    }
+
+    useEffect(() => {
+        fetchProducts()
+    }, [])
     return (
         <div className="relative min-h-screen bg-[#050816] overflow-hidden">
 
@@ -51,7 +74,7 @@ const ProductDetails = () => {
                             </span>
 
                             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3">
-                                {product.name}
+                                {product.title}
                             </h1>
 
                             <p className="text-3xl font-bold text-white mt-5">

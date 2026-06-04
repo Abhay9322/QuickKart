@@ -6,7 +6,7 @@ const HeroSection = () => {
 
             {/* Background Image */}
             <img
-                src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600"
+                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399"
                 alt="Ecommerce Fashion Store"
                 className="absolute inset-0 w-full h-full object-cover"
             />
@@ -22,16 +22,17 @@ const HeroSection = () => {
             <div className="text-center relative z-10">
 
                 <p className="text-violet-400 tracking-[6px] text-sm mb-4">
-                    PREMIUM ATHLETIC FASHION
+                    FARM FRESH • DIRECT FROM FARMERS
                 </p>
 
                 <h1 className="text-5xl md:text-7xl font-bold text-white">
-                    ELITE ATHLETICS
+                    DigitalKisanBazar
                 </h1>
 
                 <p className="text-gray-300 mt-6 max-w-2xl mx-auto text-lg">
-                    Premium sportswear crafted for performance,
-                    comfort and luxury lifestyle.
+                    Bringing farmers and customers together with fresh fruits,
+                    vegetables, grains, and quality farm products delivered
+                    directly from the source.
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-4 mt-10">

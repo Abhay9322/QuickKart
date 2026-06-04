@@ -13,41 +13,40 @@ const Footer = () => {
 
                     {/* Brand */}
                     <div>
-                        <h1 className="text-3xl font-bold tracking-[8px] text-white">
-                            ELITE
+                        <h1 className="text-3xl font-bold text-white">
+                            DigitalKisanBazar
                         </h1>
 
-                        <p className="text-violet-400 text-xs tracking-[4px] mt-2">
-                            PREMIUM • STYLE • YOU
+                        <p className="text-green-400 text-xs tracking-[3px] mt-2">
+                            FARM FRESH • DIRECT FROM FARMERS
                         </p>
 
                         <p className="text-gray-400 mt-4 text-sm leading-relaxed">
-                            Luxury athletic fashion designed for those who
-                            demand performance and elegance.
+                            Bringing fresh fruits, vegetables, grains and dairy products directly from farmers to your doorstep.
                         </p>
                     </div>
 
                     {/* Shop */}
                     <div>
                         <h3 className="text-white font-semibold mb-4">
-                            Shop
+                            Categories
                         </h3>
 
                         <ul className="space-y-3 text-gray-400 text-sm">
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                New Arrivals
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Fruits
                             </li>
 
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                Collections
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Vegetables
                             </li>
 
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                Archive
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Grains
                             </li>
 
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                Best Sellers
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Dairy
                             </li>
                         </ul>
                     </div>
@@ -55,23 +54,23 @@ const Footer = () => {
                     {/* Support */}
                     <div>
                         <h3 className="text-white font-semibold mb-4">
-                            Support
+                            Customer Support
                         </h3>
 
                         <ul className="space-y-3 text-gray-400 text-sm">
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                Shipping
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Contact Us
                             </li>
 
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                Returns
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Shipping Policy
                             </li>
 
-                            <li className="hover:text-violet-400 transition cursor-pointer">
-                                Contact
+                            <li className="hover:text-green-400 transition cursor-pointer">
+                                Return Policy
                             </li>
 
-                            <li className="hover:text-violet-400 transition cursor-pointer">
+                            <li className="hover:text-green-400 transition cursor-pointer">
                                 FAQ
                             </li>
                         </ul>
@@ -83,7 +82,7 @@ const Footer = () => {
                 <div className="mt-12 pt-6 border-t border-white/10 text-center">
 
                     <p className="text-gray-500 text-sm">
-                        © 2026 ELITE. All rights reserved.
+                        © 2026 DigitalKisanBazar. All rights reserved.
                     </p>
 
                 </div>

@@ -28,12 +28,12 @@ const Header = () => {
 
                 {/* Logo */}
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold tracking-[8px] text-white">
-                        ELITE
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-[2px] text-white">
+                        KisanBazar
                     </h1>
 
                     <p className="text-[10px] tracking-[4px] text-violet-400">
-                        PREMIUM • STYLE
+                        FARM FRESH • DIRECT FROM FARMERS
                     </p>
                 </div>
 

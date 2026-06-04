@@ -1,33 +1,56 @@
 // src/pages/Cart.jsx
 
-import React, { useState } from "react";
+import React from "react";
 import CartItem from "../components/cart/CartItem";
 import CartSummary from "../components/cart/CartSummary";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const Cart = () => {
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            name: "Elite Runner",
-            price: 120,
-            quantity: 1,
-            image:
-                "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
-        },
-        {
-            id: 2,
-            name: "Urban Hoodie",
-            price: 80,
-            quantity: 2,
-            image:
-                "https://images.unsplash.com/photo-1520975916090-3105956dac38",
-        },
-    ]);
+    // const [cartItems, setCartItems] = useState([
+    //     {
+    //         id: 1,
+    //         name: "Elite Runner",
+    //         price: 120,
+    //         quantity: 1,
+    //         image:
+    //             "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6",
+    //     },
+    //     {
+    //         id: 2,
+    //         name: "Urban Hoodie",
+    //         price: 80,
+    //         quantity: 2,
+    //         image:
+    //             "https://images.unsplash.com/photo-1520975916090-3105956dac38",
+    //     },
+    // ]);
+
+    const [cartItems, setCartItems] = useState([])
+
+    const getCartItems = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/v1/cart", { withCredentials: true })
+            setCartItems(response.data.items)
+            console.log(Array.isArray(response.data.items))
+            console.log("Cart response is:", response.data);
+
+        } catch (error) {
+            console.log(error.response.data);
+
+        }
+    }
+
+    useEffect(() => {
+        getCartItems()
+    }, [])
+
+
 
     const increaseQty = (id) => {
         setCartItems((prev) =>
             prev.map((item) =>
-                item.id === id
+                item._id === id
                     ? { ...item, quantity: item.quantity + 1 }
                     : item
             )
@@ -37,7 +60,7 @@ const Cart = () => {
     const decreaseQty = (id) => {
         setCartItems((prev) =>
             prev.map((item) =>
-                item.id === id && item.quantity > 1
+                item._id === id && item.quantity > 1
                     ? { ...item, quantity: item.quantity - 1 }
                     : item
             )
@@ -45,7 +68,7 @@ const Cart = () => {
     };
 
     const total = cartItems.reduce(
-        (acc, item) => acc + item.price * item.quantity,
+        (acc, item) => acc + item.product.price * item.quantity,
         0
     );
 
@@ -79,7 +102,7 @@ const Cart = () => {
                     <div className="lg:col-span-2 space-y-5">
                         {cartItems.map((item) => (
                             <CartItem
-                                key={item.id}
+                                key={item._id}
                                 item={item}
                                 onIncrease={increaseQty}
                                 onDecrease={decreaseQty}

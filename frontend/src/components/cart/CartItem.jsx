@@ -8,18 +8,18 @@ const CartItem = ({ item, onIncrease, onDecrease }) => {
             <div className="flex items-center gap-4">
 
                 <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.product.images?.[0] || "/placeholder.png"}
+                    alt={item.product.title}
                     className="w-24 h-24 object-cover rounded-2xl border border-white/10"
                 />
 
                 <div>
                     <h2 className="font-semibold text-white text-lg">
-                        {item.name}
+                        {item.product.title}
                     </h2>
 
                     <p className="text-violet-300 text-sm">
-                        ${item.price}
+                        ${item.product.price}
                     </p>
                 </div>
 
@@ -40,7 +40,7 @@ const CartItem = ({ item, onIncrease, onDecrease }) => {
                 </span>
 
                 <button
-                    onClick={() => onIncrease(item.id)}
+                    onClick={() => onIncrease(item._id)}
                     className="w-10 h-10 rounded-full bg-white/10 border border-white/10 text-white hover:bg-violet-500 transition"
                 >
                     +
@@ -50,7 +50,7 @@ const CartItem = ({ item, onIncrease, onDecrease }) => {
 
             {/* Total */}
             <div className="font-bold text-xl text-white">
-                ${item.price * item.quantity}
+                ${item.product.price * item.quantity}
             </div>
 
         </div>

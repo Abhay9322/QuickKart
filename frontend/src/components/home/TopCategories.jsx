@@ -3,10 +3,10 @@ import CategoryCard from "./CategoryCard";
 
 const TopCategories = () => {
     const categories = [
-        "Shoes",
-        "Hoodies",
-        "Tracksuits",
-        "Accessories",
+        "Grains",
+        "Fruits",
+        "Vegetables",
+        "Dairy",
     ];
 
     return (
@@ -15,11 +15,11 @@ const TopCategories = () => {
             <div className="text-center mb-12">
 
                 <h2 className="text-4xl font-bold text-white">
-                    Top Categories
+                    Shop By Category
                 </h2>
 
                 <p className="text-gray-400 mt-3">
-                    Discover our most popular collections
+                    Fresh produce sourced directly from farmers
                 </p>
 
             </div>

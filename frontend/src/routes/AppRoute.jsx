@@ -12,6 +12,10 @@ import AuthPage from "../pages/AuthPage";
 import Profile from "../pages/Profile";
 import Shop from "../pages/Shop";
 import NotFound from "../pages/NotFound";
+import About from "../pages/About";
+import Dashboard from "../pages/Dashboard";
+import OrderSuccess from "../pages/OrderSuccess";
+import MyOrders from "../pages/MyOrders";
 
 const AppRoute = () => {
     return (
@@ -26,7 +30,11 @@ const AppRoute = () => {
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/shop" element={<Shop />} />
-                    {/* <Route path="/product/:id" element={<ProductDetails />} /> */}
+                    <Route path="/about" element={<About />} />
+                    <Route path="/admin" element={<Dashboard />} />
+                    <Route path="/product/:id" element={<ProductDetails />} />
+                    <Route path="/my-orders" element={<MyOrders />} />
+                    <Route path="/order-success/:id" element={<OrderSuccess />} />
                 </Routes>
             </Layout>
         </BrowserRouter>

@@ -1,68 +1,77 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { FaBell, FaBars, FaTimes } from "react-icons/fa";
 
 const Header = () => {
+    const [mobileOpen, setMobileOpen] = useState(false);
+
     return (
-        <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/40 border-b border-white/10">
+        <nav className="relative bg-[#050816]/80 backdrop-blur-xl border-b border-white/10">
 
-            <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex h-16 items-center justify-between">
 
-                {/* Left Navigation */}
-                <nav className="hidden md:flex gap-8 text-sm font-medium">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-white font-bold text-xl tracking-wide">
+                            KisanBazar
+                        </h1>
+                    </div>
 
-                    <Link
-                        to="/"
-                        className="text-gray-300 hover:text-violet-400 transition"
+                    <div className="hidden sm:flex gap-6 text-sm">
+                        <Link className="text-white hover:text-green-400" to="/">
+                            Dashboard
+                        </Link>
 
-                    >
-                        Home
-                    </Link>
-                    <Link
-                        to="/shop"
-                        className="text-gray-300 hover:text-violet-400 transition"
-                    >
-                        Shop
-                    </Link>
+                        <Link className="text-gray-300 hover:text-green-400" to="/shop">
+                            Shop
+                        </Link>
 
-                </nav>
+                        <Link className="text-gray-300 hover:text-green-400" to="/cart">
+                            Cart
+                        </Link>
 
-                {/* Logo */}
-                <div className="text-center">
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-[2px] text-white">
-                        KisanBazar
-                    </h1>
+                        <Link className="text-gray-300 hover:text-green-400" to="/about">
+                            About
+                        </Link>
+                    </div>
 
-                    <p className="text-[10px] tracking-[4px] text-violet-400">
-                        FARM FRESH • DIRECT FROM FARMERS
-                    </p>
-                </div>
+                    <div className="flex items-center gap-4">
 
-                {/* Actions */}
-                <div className="flex items-center gap-6 text-sm">
-                    <Link
-                        to="/search"
-                        className="text-gray-300 hover:text-violet-400 transition"
-                    >
-                        Search
-                    </Link>
+                        <button className="text-gray-400 hover:text-white cursor-pointer">
+                            <FaBell size={20} />
+                        </button>
 
-                    <Link
-                        to="/cart"
-                        className="text-gray-300 hover:text-violet-400 transition"
-                    >
-                        Cart
-                    </Link>
-                    <Link
-                        to="/auth"
-                        className="text-gray-300 hover:text-violet-400 transition"
-                    >
-                        SignUp
-                    </Link>
+                        <img
+                            src="https://i.pravatar.cc/40"
+                            className="w-9 h-9 rounded-full border border-white/10"
+                            alt="profile"
+                            className="w-10 h-10 rounded-full border border-white/10 cursor-pointer"
+                        />
+
+                        <button
+                            className="sm:hidden text-white"
+                            onClick={() => setMobileOpen(!mobileOpen)}
+                        >
+                            {mobileOpen ? <FaTimes /> : <FaBars />}
+                        </button>
+
+                    </div>
 
                 </div>
-
             </div>
-        </header>
+
+            {mobileOpen && (
+                <div className="sm:hidden px-4 pb-4 space-y-3 bg-[#050816] border-t border-white/10">
+
+                    <Link className="block text-white" to="/">Dashboard</Link>
+                    <Link className="block text-gray-300" to="/shop">Shop</Link>
+                    <Link className="block text-gray-300" to="/cart">Cart</Link>
+                    <Link className="block text-gray-300" to="/about">About</Link>
+
+                </div>
+            )}
+
+        </nav>
     );
 };
 

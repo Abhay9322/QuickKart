@@ -1,259 +1,195 @@
-// src/pages/Checkout.jsx
-
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { CartContext } from "../context/CartContext";
 
 const Checkout = () => {
-    const [paymentMethod, setPaymentMethod] = useState("card");
+    const navigate = useNavigate();
 
-    const cartItems = [
-        {
-            id: 1,
-            name: "Premium Running Shoes",
-            price: 120,
-            quantity: 1,
-            image:
-                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
-        },
-        {
-            id: 2,
-            name: "Classic Hoodie",
-            price: 80,
-            quantity: 1,
-            image:
-                "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500",
-        },
-    ];
+    const { cartItems, setCartItems } = useContext(CartContext);
+
+    const [paymentMethod, setPaymentMethod] = useState("COD");
+
+    const [shippingAddress, setShippingAddress] = useState({
+        fullName: "",
+        phone: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        country: "India"
+    });
 
     const subtotal = cartItems.reduce(
-        (acc, item) => acc + item.price * item.quantity,
+        (acc, item) => acc + item.product.price * item.quantity,
         0
     );
 
-    const shipping = 10;
+    const shipping = 0;
     const total = subtotal + shipping;
 
+    const handlePlaceOrder = async () => {
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/api/v1/orders",
+                {
+                    shippingAddress,
+                    paymentMethod
+                },
+                {
+                    withCredentials: true
+                }
+            );
+
+            console.log(response.data);
+
+            setCartItems([])
+            alert("Order Placed Successfully ✅");
+
+            navigate(`/order-success/${response.data.data._id}`);
+
+        } catch (error) {
+            console.log(error.response?.data || error.message);
+        }
+    };
+
     return (
-        <div className="relative min-h-screen bg-[#050816] overflow-hidden">
+        <div className="min-h-screen bg-[#050816] text-white relative overflow-hidden">
 
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[radial-gradient(#312e81_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
+            {/* Glow Background */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-green-500/10 blur-[150px]" />
 
-            {/* Violet Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-violet-600/20 blur-[180px]" />
+            {/* MAIN WRAPPER */}
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 flex flex-col justify-center">
 
-            <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-
-                {/* Title */}
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold text-white">
-                        Checkout
-                    </h1>
-
-                    <p className="text-gray-400 mt-3">
-                        Complete your order securely
+                {/* Heading */}
+                <div className="mb-10">
+                    <h1 className="text-4xl font-bold">Checkout</h1>
+                    <p className="text-gray-400 mt-2">
+                        Complete your purchase securely
                     </p>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
+                {/* GRID */}
+                <div className="grid lg:grid-cols-3 gap-8 items-stretch">
 
-                    {/* LEFT SIDE */}
-                    <div className="lg:col-span-2 space-y-8">
+                    {/* LEFT */}
+                    <div className="lg:col-span-2 bg-[#0b1020] border border-white/10 rounded-3xl p-8 shadow-xl">
 
-                        {/* Shipping Address */}
-                        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl">
+                        <h2 className="text-2xl font-bold mb-6">
+                            Shipping Address
+                        </h2>
 
-                            <h2 className="text-2xl font-bold text-white mb-6">
-                                Shipping Address
-                            </h2>
+                        <div className="grid md:grid-cols-2 gap-4">
 
-                            <div className="grid md:grid-cols-2 gap-4">
-
+                            {/* inputs */}
+                            {["fullName", "phone", "addressLine1", "addressLine2", "city", "state", "postalCode", "country"].map((field) => (
                                 <input
+                                    key={field}
                                     type="text"
-                                    placeholder="First Name"
-                                    className="w-full bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
+                                    placeholder={field}
+                                    value={shippingAddress[field]}
+                                    onChange={(e) =>
+                                        setShippingAddress({
+                                            ...shippingAddress,
+                                            [field]: e.target.value,
+                                        })
+                                    }
+                                    className="w-full bg-[#111827] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
                                 />
+                            ))}
 
-                                <input
-                                    type="text"
-                                    placeholder="Last Name"
-                                    className="w-full bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                                <input
-                                    type="email"
-                                    placeholder="Email Address"
-                                    className="w-full md:col-span-2 bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="Street Address"
-                                    className="w-full md:col-span-2 bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="City"
-                                    className="w-full bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="State"
-                                    className="w-full bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="Zip Code"
-                                    className="w-full bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="Country"
-                                    className="w-full bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                />
-
-                            </div>
                         </div>
 
-                        {/* Payment Method */}
-                        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl">
-
-                            <h2 className="text-2xl font-bold text-white mb-6">
+                        {/* PAYMENT */}
+                        <div className="mt-8">
+                            <h3 className="text-lg font-semibold mb-4">
                                 Payment Method
-                            </h2>
+                            </h3>
 
-                            <div className="space-y-4">
-
-                                <label className="flex items-center gap-3 border border-white/10 bg-white/5 p-4 rounded-2xl cursor-pointer text-white hover:border-violet-500 transition">
-                                    <input
-                                        type="radio"
-                                        checked={paymentMethod === "card"}
-                                        onChange={() => setPaymentMethod("card")}
-                                    />
-                                    Credit / Debit Card
-                                </label>
-
-                                <label className="flex items-center gap-3 border border-white/10 bg-white/5 p-4 rounded-2xl cursor-pointer text-white hover:border-violet-500 transition">
-                                    <input
-                                        type="radio"
-                                        checked={paymentMethod === "upi"}
-                                        onChange={() => setPaymentMethod("upi")}
-                                    />
-                                    UPI Payment
-                                </label>
-
-                                <label className="flex items-center gap-3 border border-white/10 bg-white/5 p-4 rounded-2xl cursor-pointer text-white hover:border-violet-500 transition">
-                                    <input
-                                        type="radio"
-                                        checked={paymentMethod === "cod"}
-                                        onChange={() => setPaymentMethod("cod")}
-                                    />
-                                    Cash on Delivery
-                                </label>
-
+                            <div className="grid grid-cols-3 gap-3">
+                                {["COD", "Stripe", "Razorpay"].map((m) => (
+                                    <button
+                                        key={m}
+                                        onClick={() => setPaymentMethod(m)}
+                                        className={`p-4 rounded-xl border transition ${paymentMethod === m
+                                            ? "border-green-500 bg-green-500/10"
+                                            : "border-white/10"
+                                            }`}
+                                    >
+                                        {m}
+                                    </button>
+                                ))}
                             </div>
-
-                            {paymentMethod === "card" && (
-                                <div className="grid md:grid-cols-2 gap-4 mt-6">
-
-                                    <input
-                                        type="text"
-                                        placeholder="Card Number"
-                                        className="md:col-span-2 bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                    />
-
-                                    <input
-                                        type="text"
-                                        placeholder="Expiry Date"
-                                        className="bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                    />
-
-                                    <input
-                                        type="text"
-                                        placeholder="CVV"
-                                        className="bg-transparent border border-white/10 rounded-xl p-3 text-white placeholder-gray-400 outline-none focus:border-violet-500"
-                                    />
-
-                                </div>
-                            )}
-
                         </div>
-
                     </div>
 
-                    {/* RIGHT SIDE */}
-                    <div>
+                    {/* RIGHT */}
+                    <div className="bg-[#0b1020] border border-white/10 rounded-3xl p-8 shadow-xl h-full flex flex-col lg:sticky lg:top-6">
 
-                        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl sticky top-6">
+                        <h2 className="text-2xl font-bold mb-6">
+                            Order Summary
+                        </h2>
 
-                            <h2 className="text-2xl font-bold text-white mb-6">
-                                Order Summary
-                            </h2>
+                        <div className="flex-1 space-y-4 overflow-y-auto max-h-[60vh] pr-2">
 
-                            <div className="space-y-5">
+                            {cartItems.map((item) => (
+                                <div
+                                    key={item._id}
+                                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10"
+                                >
+                                    <img
+                                        src={item.product.images?.[0]?.url}
+                                        className="w-16 h-16 rounded-xl object-cover"
+                                    />
 
-                                {cartItems.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex items-center gap-4"
-                                    >
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            className="w-16 h-16 rounded-xl object-cover border border-white/10"
-                                        />
-
-                                        <div className="flex-1">
-                                            <h3 className="text-white font-medium">
-                                                {item.name}
-                                            </h3>
-
-                                            <p className="text-gray-400 text-sm">
-                                                Qty: {item.quantity}
-                                            </p>
-                                        </div>
-
-                                        <p className="font-semibold text-white">
-                                            ${item.price}
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold">
+                                            {item.product.title}
+                                        </h3>
+                                        <p className="text-gray-400">
+                                            Qty: {item.quantity}
                                         </p>
                                     </div>
-                                ))}
 
-                            </div>
-
-                            <div className="border-t border-white/10 mt-6 pt-5 space-y-3">
-
-                                <div className="flex justify-between text-gray-300">
-                                    <span>Subtotal</span>
-                                    <span>${subtotal}</span>
+                                    <div className="text-green-400 font-bold">
+                                        ₹{item.product.price}
+                                    </div>
                                 </div>
-
-                                <div className="flex justify-between text-gray-300">
-                                    <span>Shipping</span>
-                                    <span>${shipping}</span>
-                                </div>
-
-                                <div className="flex justify-between text-white text-xl font-bold">
-                                    <span>Total</span>
-                                    <span>${total}</span>
-                                </div>
-
-                            </div>
-
-                            <button className="w-full mt-6 py-4 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold hover:scale-[1.02] transition">
-                                Place Order
-                            </button>
+                            ))}
 
                         </div>
 
+                        {/* TOTAL */}
+                        <div className="mt-6 border-t border-white/10 pt-6 space-y-3">
+
+                            <div className="flex justify-between text-gray-400">
+                                <span>Subtotal</span>
+                                <span>₹{subtotal}</span>
+                            </div>
+
+                            <div className="flex justify-between text-gray-400">
+                                <span>Shipping</span>
+                                <span className="text-green-400">Free</span>
+                            </div>
+
+                            <div className="flex justify-between text-2xl font-bold">
+                                <span>Total</span>
+                                <span className="text-green-400">₹{total}</span>
+                            </div>
+
+                        </div>
+
+                        <button
+                            onClick={handlePlaceOrder}
+                            className="w-full mt-8 bg-green-600 hover:bg-green-500 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-600/30"
+                        >
+                            Place Order 🚀
+                        </button>
+
                     </div>
-
                 </div>
-
             </div>
         </div>
     );

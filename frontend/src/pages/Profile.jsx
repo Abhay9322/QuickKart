@@ -1,10 +1,4 @@
-import React from "react";
-
-import {
-    FaShoppingBag,
-    FaTruck,
-    FaCheckCircle,
-} from "react-icons/fa";
+import { FaShoppingBag, FaTruck, FaCheckCircle } from "react-icons/fa";
 
 import ProfileHeader from "../components/profile/ProfileHeader";
 import StatsCard from "../components/profile/StatsCard";
@@ -12,94 +6,76 @@ import OrderCard from "../components/profile/OrderCard";
 import AddressCard from "../components/profile/AddressCard";
 import LogoutButton from "../components/profile/LogoutButton";
 
+import { useContext } from "react";
+// import { UserContext } from "../context/UserContext";
+import { UserContext } from "../context/UserContex";
+
 const Profile = () => {
 
-    const user = {
-        name: "John Doe",
-        email: "john@gmail.com",
-        image: "https://i.pravatar.cc/150?img=12",
+    const { user } = useContext(UserContext);
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-[#050816] flex items-center justify-center text-red-500">
+                Failed to load profile
+            </div>
+        );
+    }
+
+    const orders = user.orders || [];
+
+    const address = user.address || {
+        name: user.name,
+        phone: "",
+        street: "",
+        city: "",
+        state: "",
+        pincode: "",
     };
 
-    const address = {
-        name: "John Doe",
-        phone: "+91 9876543210",
-        street: "221B Baker Street",
-        city: "Mumbai",
-        state: "Maharashtra",
-        pincode: "400001",
-    };
+    const totalOrders = orders.length;
 
-    const orders = [
-        {
-            id: "#12345",
-            name: "Nike Air Max",
-            image:
-                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
-            price: 120,
-            status: "Delivered",
-            date: "20 May 2026",
-        },
-        {
-            id: "#12346",
-            name: "Smart Watch",
-            image:
-                "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-            price: 250,
-            status: "Pending",
-            date: "28 May 2026",
-        },
-    ];
+    const pendingOrders = orders.filter(
+        (order) => order.status === "Pending"
+    ).length;
+
+    const deliveredOrders = orders.filter(
+        (order) => order.status === "Delivered"
+    ).length;
 
     return (
-        <div className="relative min-h-screen bg-[#050816] overflow-hidden p-5">
+        <div className="relative min-h-screen bg-[#050816] text-white overflow-hidden p-5">
 
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[radial-gradient(#312e81_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
-
-            {/* Violet Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-violet-600/20 blur-[180px]" />
-
-            <div className="relative z-10 max-w-7xl mx-auto space-y-6">
+            <div className="relative z-10 max-w-7xl mx-auto space-y-8">
 
                 <ProfileHeader user={user} />
 
                 <div className="grid md:grid-cols-3 gap-5">
 
-                    <StatsCard
-                        title="Total Orders"
-                        value="25"
-                        icon={FaShoppingBag}
-                    />
+                    <StatsCard title="Total Orders" value={totalOrders} icon={FaShoppingBag} />
 
-                    <StatsCard
-                        title="Pending Orders"
-                        value="5"
-                        icon={FaTruck}
-                    />
+                    <StatsCard title="Pending Orders" value={pendingOrders} icon={FaTruck} />
 
-                    <StatsCard
-                        title="Delivered"
-                        value="20"
-                        icon={FaCheckCircle}
-                    />
+                    <StatsCard title="Delivered" value={deliveredOrders} icon={FaCheckCircle} />
 
                 </div>
 
                 <div>
-
-                    <h2 className="text-3xl font-bold text-white mb-4">
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-4">
                         My Orders
                     </h2>
 
-                    <div className="space-y-4">
-                        {orders.map((order) => (
-                            <OrderCard
-                                key={order.id}
-                                order={order}
-                            />
-                        ))}
-                    </div>
-
+                    {orders.length === 0 ? (
+                        <div className="bg-[#0b1020] border border-white/10 rounded-xl p-6 text-center text-gray-400">
+                            No orders found
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {orders.map((order) => (
+                                <OrderCard key={order._id} order={order} />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <AddressCard address={address} />
@@ -109,7 +85,6 @@ const Profile = () => {
                 </div>
 
             </div>
-
         </div>
     );
 };

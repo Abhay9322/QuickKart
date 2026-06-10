@@ -2,40 +2,34 @@ import React from "react";
 
 const ProductCard = ({ product, onAddToCart }) => {
     return (
-        <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/40 transition-all duration-300">
+        <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/40 transition">
 
-            {/* Product Image */}
             <div className="h-44 overflow-hidden">
-
                 <img
                     src={product.images?.[0]?.url}
-                    alt={product.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    className="w-full h-full object-cover group-hover:scale-110 transition"
                 />
-
             </div>
 
-            {/* Content */}
             <div className="p-4">
 
-                <p className="text-violet-400 text-xs uppercase tracking-wide">
+                <p className="text-violet-400 text-xs uppercase tracking-widest">
                     {product.category.name}
                 </p>
 
-                <h3 className="text-white font-semibold text-base mt-1 line-clamp-1">
+                <h3 className="text-white font-semibold mt-1 line-clamp-1">
                     {product.title}
                 </h3>
 
-                <p className="text-xl font-bold text-white mt-2">
-                    RS {product.price}
+                <p className="text-white font-bold mt-2">
+                    ₹{product.price}
                 </p>
 
-                <button className="w-full mt-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-medium hover:opacity-90 transition cursor-pointer" onClick={onAddToCart}>
+                <button className="w-full mt-4 py-2 rounded-xl bg-gradient-to-r  bg-green-600 hover:bg-green-500 hover:scale-[1.02] transition">
                     Add to Cart
                 </button>
 
             </div>
-
         </div>
     );
 };

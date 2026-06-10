@@ -2,35 +2,42 @@ import React from "react";
 
 const ProductCard = ({ product, onAddToCart }) => {
     return (
-        <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-violet-500/40 transition-all duration-300">
+        <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-green-500/40 transition-all duration-300">
 
-            {/* Product Image */}
+            {/* IMAGE */}
             <div className="h-60 overflow-hidden">
 
                 <img
-                    src={product?.images[0]?.url}
+                    src={product?.images?.[0]?.url || "https://images.unsplash.com/photo-1542838132-92c53300491e"}
                     alt={product.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                 />
 
             </div>
 
-            {/* Content */}
+            {/* CONTENT */}
             <div className="p-5">
 
-                <p className="text-violet-400 text-sm">
-                    {product.category.name}
+                {/* CATEGORY */}
+                <p className="text-green-400 text-sm">
+                    {product?.category?.name || "Fresh Produce"}
                 </p>
 
+                {/* TITLE */}
                 <h3 className="text-white font-semibold text-lg mt-1">
                     {product.title}
                 </h3>
 
+                {/* PRICE */}
                 <p className="text-2xl font-bold text-white mt-3">
-                    Rs{product.price}
+                    ₹{product.price}
                 </p>
 
-                <button className="w-full mt-5 py-3 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-medium hover:opacity-90 transition cursor-pointer" onClick={onAddToCart}>
+                {/* BUTTON */}
+                <button
+                    onClick={onAddToCart}
+                    className="w-full mt-5 py-3 rounded-full bg-green-600 hover:bg-green-500 text-white font-medium transition cursor-pointer"
+                >
                     Add to Cart
                 </button>
 

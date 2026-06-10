@@ -6,7 +6,6 @@ import Footer from "../components/Footer";
 const Layout = ({ children }) => {
     return (
 
-
         <div className="min-h-screen bg-[#050816] text-white relative overflow-hidden">
 
             <div className="absolute inset-0 bg-[radial-gradient(#312e81_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />

@@ -2,47 +2,50 @@ import React from "react";
 
 const HeroSection = () => {
     return (
-        <section className="relative min-h-[80vh] flex items-center justify-center px-6 overflow-hidden">
+        <section className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
 
-            {/* Background Image */}
+            {/* Background Image (Farm theme) */}
             <img
-                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399"
-                alt="Ecommerce Fashion Store"
+                src="https://images.unsplash.com/photo-1500595046743-cd271d694d30"
+                alt="Farm field"
                 className="absolute inset-0 w-full h-full object-cover"
             />
-
 
             {/* Dark Overlay */}
             <div className="absolute inset-0 bg-black/70" />
 
-            {/* Violet Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-violet-900/20 via-black/40 to-[#050816]" />
+            {/* Green Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-green-900/30 via-black/50 to-[#050816]" />
 
-            {/* Content */}
-            <div className="text-center relative z-10">
+            {/* CONTENT */}
+            <div className="relative z-10 text-center max-w-3xl">
 
-                <p className="text-violet-400 tracking-[6px] text-sm mb-4">
-                    FARM FRESH • DIRECT FROM FARMERS
+                {/* TAGLINE */}
+                <p className="text-green-400 tracking-[6px] text-xs sm:text-sm mb-4">
+                    DIRECT FROM FARMERS • FRESH • ORGANIC
                 </p>
 
-                <h1 className="text-5xl md:text-7xl font-bold text-white">
-                    DigitalKisanBazar
+                {/* TITLE */}
+                <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-white leading-tight">
+                    KisanBazar
                 </h1>
 
-                <p className="text-gray-300 mt-6 max-w-2xl mx-auto text-lg">
-                    Bringing farmers and customers together with fresh fruits,
-                    vegetables, grains, and quality farm products delivered
-                    directly from the source.
+                {/* SUBTITLE */}
+                <p className="text-gray-300 mt-6 text-base sm:text-lg leading-relaxed">
+                    Bringing farmers and customers together — fresh fruits,
+                    vegetables, grains, and organic farm products delivered
+                    directly from the fields to your home 🌱
                 </p>
 
+                {/* BUTTONS */}
                 <div className="flex flex-wrap justify-center gap-4 mt-10">
 
-                    <button className="px-8 py-4 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold hover:scale-105 transition">
-                        Shop Now
+                    <button className="px-7 py-3 rounded-xl bg-green-600 hover:bg-green-500 transition font-semibold">
+                        Shop Fresh Products
                     </button>
 
-                    <button className="px-8 py-4 rounded-full border border-white/20 text-white hover:bg-white/10 transition">
-                        Explore Collection
+                    <button className="px-7 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition">
+                        Explore Categories
                     </button>
 
                 </div>

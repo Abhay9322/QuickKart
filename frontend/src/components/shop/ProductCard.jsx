@@ -1,4 +1,5 @@
 import React from "react";
+// import { addToCart } from "../../../../controllers/cart.controller";
 
 const ProductCard = ({ product, onAddToCart }) => {
     return (
@@ -25,7 +26,7 @@ const ProductCard = ({ product, onAddToCart }) => {
                     ₹{product.price}
                 </p>
 
-                <button className="w-full mt-4 py-2 rounded-xl bg-gradient-to-r  bg-green-600 hover:bg-green-500 hover:scale-[1.02] transition">
+                <button className="w-full mt-4 py-2 rounded-xl bg-gradient-to-r  bg-green-600 hover:bg-green-500 hover:scale-[1.02] transition cursor-pointer" onClick={onAddToCart}>
                     Add to Cart
                 </button>
 

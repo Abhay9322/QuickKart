@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
 export const UserContext = createContext();
@@ -6,6 +6,20 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        console.log("stored", storedUser);
+
+        if (storedUser && storedUser !== "undefined") {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (err) {
+                console.log("Invalid user in localStorage");
+                localStorage.removeItem("user");
+            }
+        }
+    }, []);
 
     const register = async (name, email, password, phone) => {
         setLoading(true);
@@ -36,10 +50,13 @@ export const UserProvider = ({ children }) => {
                 { withCredentials: true }
             );
 
-            // setUser(res.data.user);
-            setUser(res.data);
-            console.log("Response is", res.data);
+            const loggedUser = res.data.data; // ✅ FIX
 
+            setUser(loggedUser);
+
+            localStorage.setItem("user", JSON.stringify(loggedUser)); // ✅ IMPORTANT
+
+            console.log("User:", loggedUser);
 
             return res.data;
         } catch (error) {
@@ -49,7 +66,6 @@ export const UserProvider = ({ children }) => {
             setLoading(false);
         }
     };
-
 
     return (
         <UserContext.Provider value={{ user, loading, register, login }}>

@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+    const navigate = useNavigate()
     return (
         <section className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
 
@@ -40,11 +42,14 @@ const HeroSection = () => {
                 {/* BUTTONS */}
                 <div className="flex flex-wrap justify-center gap-4 mt-10">
 
-                    <button className="px-7 py-3 rounded-xl bg-green-600 hover:bg-green-500 transition font-semibold">
+                    <button
+                        onClick={() => navigate("/shop")}
+                        className="px-7 py-3 rounded-xl bg-green-600 hover:bg-green-500 transition font-semibold cursor-pointer"
+                    >
                         Shop Fresh Products
                     </button>
 
-                    <button className="px-7 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition">
+                    <button className="px-7 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition cursor-po]">
                         Explore Categories
                     </button>
 

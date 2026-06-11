@@ -19,7 +19,7 @@ const Header = () => {
 
                     <div className="hidden sm:flex gap-6 text-sm">
                         <Link className="text-white hover:text-green-400" to="/">
-                            Dashboard
+                            Home
                         </Link>
 
                         <Link className="text-gray-300 hover:text-green-400" to="/shop">
@@ -36,20 +36,24 @@ const Header = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-
+                        {/* 
                         <button className="text-gray-400 hover:text-white cursor-pointer">
                             <FaBell size={20} />
-                        </button>
+                        </button> */}
+                        <Link className="text-gray-300 hover:text-green-400" to="/auth">
+                            SignUp
+                        </Link>
 
-                        <img
-                            src="https://i.pravatar.cc/40"
-                            className="w-9 h-9 rounded-full border border-white/10"
-                            alt="profile"
-                            className="w-10 h-10 rounded-full border border-white/10 cursor-pointer"
-                        />
+                        <Link to="/profile">
+                            <img
+                                src="https://i.pravatar.cc/40"
+                                alt="profile"
+                                className="w-10 h-10 rounded-full border border-white/10 cursor-pointer"
+                            />
+                        </Link>
 
                         <button
-                            className="sm:hidden text-white"
+                            className="sm:hidden text-white cursor-pointer"
                             onClick={() => setMobileOpen(!mobileOpen)}
                         >
                             {mobileOpen ? <FaTimes /> : <FaBars />}

@@ -1,3 +1,6 @@
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+
 import { FaShoppingBag, FaTruck, FaCheckCircle } from "react-icons/fa";
 
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -6,62 +9,105 @@ import OrderCard from "../components/profile/OrderCard";
 import AddressCard from "../components/profile/AddressCard";
 import LogoutButton from "../components/profile/LogoutButton";
 
-import { useContext } from "react";
-// import { UserContext } from "../context/UserContext";
 import { UserContext } from "../context/UserContex";
 
 const Profile = () => {
-
     const { user } = useContext(UserContext);
 
-    if (!user) {
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const userId = user?._id;
+
+    useEffect(() => {
+        if (!userId) {
+            setLoading(false);
+            return;
+        }
+
+        const fetchProfile = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:5000/api/v1/users/profile/${userId}`,
+                    { withCredentials: true }
+                );
+
+                setProfile(response.data.data);
+            } catch (error) {
+                console.log("Profile error:", error);
+                setProfile(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, [userId]);
+
+    if (loading) {
         return (
-            <div className="min-h-screen bg-[#050816] flex items-center justify-center text-red-500">
+            <div className="min-h-screen bg-[#050816] flex items-center justify-center text-white text-lg">
+                Loading profile...
+            </div>
+        );
+    }
+
+    if (!profile) {
+        return (
+            <div className="min-h-screen bg-[#050816] flex items-center justify-center text-red-500 text-center px-4">
                 Failed to load profile
             </div>
         );
     }
 
-    const orders = user.orders || [];
+    const orders = profile.orders || [];
 
-    const address = user.address || {
-        name: user.name,
-        phone: "",
-        street: "",
-        city: "",
-        state: "",
-        pincode: "",
-    };
+    const address = orders?.[0]?.shippingAddress || {};
 
     const totalOrders = orders.length;
 
     const pendingOrders = orders.filter(
-        (order) => order.status === "Pending"
+        (order) => order.orderStatus?.toLowerCase() === "pending"
     ).length;
 
     const deliveredOrders = orders.filter(
-        (order) => order.status === "Delivered"
+        (order) => order.orderStatus?.toLowerCase() === "delivered"
     ).length;
 
     return (
-        <div className="relative min-h-screen bg-[#050816] text-white overflow-hidden p-5">
+        <div className="relative min-h-screen bg-[#050816] text-white overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
 
-            <div className="relative z-10 max-w-7xl mx-auto space-y-8">
+            <div className="relative z-10 max-w-7xl mx-auto space-y-6 md:space-y-8">
 
-                <ProfileHeader user={user} />
+                {/* Profile Header */}
+                <ProfileHeader user={profile} />
 
-                <div className="grid md:grid-cols-3 gap-5">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
 
-                    <StatsCard title="Total Orders" value={totalOrders} icon={FaShoppingBag} />
+                    <StatsCard
+                        title="Total Orders"
+                        value={totalOrders}
+                        icon={FaShoppingBag}
+                    />
 
-                    <StatsCard title="Pending Orders" value={pendingOrders} icon={FaTruck} />
+                    <StatsCard
+                        title="Pending Orders"
+                        value={pendingOrders}
+                        icon={FaTruck}
+                    />
 
-                    <StatsCard title="Delivered" value={deliveredOrders} icon={FaCheckCircle} />
+                    <StatsCard
+                        title="Delivered"
+                        value={deliveredOrders}
+                        icon={FaCheckCircle}
+                    />
 
                 </div>
 
+                {/* Orders Section */}
                 <div>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
                         My Orders
                     </h2>
 
@@ -70,17 +116,22 @@ const Profile = () => {
                             No orders found
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                             {orders.map((order) => (
-                                <OrderCard key={order._id} order={order} />
+                                <OrderCard
+                                    key={order._id}
+                                    order={order}
+                                />
                             ))}
                         </div>
                     )}
                 </div>
 
+                {/* Address Section */}
                 <AddressCard address={address} />
 
-                <div className="flex justify-end">
+                {/* Logout Button */}
+                <div className="flex justify-center sm:justify-end">
                     <LogoutButton />
                 </div>
 

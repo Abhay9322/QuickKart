@@ -4,6 +4,7 @@ import axios from "axios";
 import { useContext } from "react";
 // import { CartContext } from "../context/CartContext";
 import { CartContext } from "../../context/CartContext";
+import { toast } from "sonner";
 
 const TrendingProducts = () => {
 
@@ -55,7 +56,8 @@ const TrendingProducts = () => {
             // console.log("Items are:", items);
 
 
-            alert("Added to cart 🌱");
+            // alert("Added to cart 🌱");
+            toast.success("Item added to cart successfully");
 
         } catch (error) {
             console.log(error.response?.data);

@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "sonner";
 
 export const UserContext = createContext();
 
@@ -31,6 +32,7 @@ export const UserProvider = ({ children }) => {
                 { withCredentials: true }
             );
 
+            toast.success("User Registered successfully");
             return res.data;
         } catch (error) {
             console.log(error.response?.data || error.message);
@@ -55,6 +57,7 @@ export const UserProvider = ({ children }) => {
             setUser(loggedUser);
 
             localStorage.setItem("user", JSON.stringify(loggedUser)); // ✅ IMPORTANT
+            toast.success("User Logged in successful");
 
             console.log("User:", loggedUser);
 

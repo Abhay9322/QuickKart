@@ -1,11 +1,11 @@
 import React from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 
-const LogoutButton = ({ onClick }) => {
+const LogoutButton = ({ logout }) => {
     return (
         <button
-            onClick={onClick}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 hover:text-red-300 transition-all duration-300"
+            onClick={logout}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 hover:text-red-300 transition-all duration-300 cursor-pointer"
         >
 
             <FaSignOutAlt />

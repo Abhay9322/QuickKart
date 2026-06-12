@@ -6,25 +6,6 @@ const CartSummary = ({ total }) => {
 
     const navigate = useNavigate();
 
-    const handleCheckout = async () => {
-        try {
-            const response = await axios.post(
-                "http://localhost:5000/api/v1/orders",
-                {},
-                { withCredentials: true }
-            );
-
-            console.log(response.data);
-
-            alert("Order Created Successfully ✅");
-
-            navigate("/checkout");
-
-        } catch (error) {
-            console.log(error.response?.data || error.message);
-        }
-    };
-
     return (
         <div className="bg-[#0b1020] border border-white/10 rounded-2xl p-6 shadow-md sticky top-6">
 
@@ -54,7 +35,7 @@ const CartSummary = ({ total }) => {
             <button
                 onClick={() => navigate("/checkout")}
                 // onClick={handleCheckout}
-                className="w-full mt-6 bg-green-600 hover:bg-green-500 transition py-3 rounded-xl font-semibold"
+                className="w-full mt-6 bg-green-600 hover:bg-green-500 transition py-3 rounded-xl font-semibold cursor-pointer"
             >
                 Proceed to Checkout
             </button>

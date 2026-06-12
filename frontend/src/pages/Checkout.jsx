@@ -2,6 +2,8 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import CartItem from "../components/cart/CartItem";
+import { toast } from "sonner";
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -21,6 +23,9 @@ const Checkout = () => {
         country: "India"
     });
 
+    console.log("Cart items are", cartItems);
+
+
     const subtotal = cartItems.reduce(
         (acc, item) => acc + item.product.price * item.quantity,
         0
@@ -28,6 +33,9 @@ const Checkout = () => {
 
     const shipping = 0;
     const total = subtotal + shipping;
+
+    console.log("Total is", total);
+
 
     const handlePlaceOrder = async () => {
         try {
@@ -45,7 +53,8 @@ const Checkout = () => {
             console.log(response.data);
 
             setCartItems([])
-            alert("Order Placed Successfully ✅");
+            // alert("Order Placed Successfully ✅");
+            toast.success("Order Placed Successfully ✅");
 
             navigate(`/order-success/${response.data.data._id}`);
 

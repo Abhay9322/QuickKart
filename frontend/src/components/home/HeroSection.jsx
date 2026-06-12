@@ -49,7 +49,7 @@ const HeroSection = () => {
                         Shop Fresh Products
                     </button>
 
-                    <button className="px-7 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition cursor-po]">
+                    <button className="px-7 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition cursor-po] cursor-pointer">
                         Explore Categories
                     </button>
 

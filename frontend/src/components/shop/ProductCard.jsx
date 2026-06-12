@@ -1,9 +1,15 @@
 import React from "react";
-// import { addToCart } from "../../../../controllers/cart.controller";
+import { useNavigate } from "react-router-dom";
+
 
 const ProductCard = ({ product, onAddToCart }) => {
+
+    const navigate = useNavigate();
     return (
-        <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/40 transition">
+        <div
+            className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/40 transition cursor-pointer"
+            onClick={() => navigate(`/product/${product._id}`)}
+        >
 
             <div className="h-44 overflow-hidden">
                 <img

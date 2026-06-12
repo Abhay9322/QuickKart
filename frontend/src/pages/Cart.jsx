@@ -9,7 +9,7 @@ import { CartContext } from "../context/CartContext";
 
 const Cart = () => {
 
-    const { cartItems, total, increaseQty, decreaseQty } = useContext(CartContext)
+    const { cartItems, total, increaseQty, decreaseQty, handleRemove } = useContext(CartContext)
 
     console.log("Cart Items:", cartItems)
     return (
@@ -46,6 +46,7 @@ const Cart = () => {
                                 item={item}
                                 onIncrease={increaseQty}
                                 onDecrease={decreaseQty}
+                                onRemove={handleRemove}
                             />
                         ))}
                     </div>

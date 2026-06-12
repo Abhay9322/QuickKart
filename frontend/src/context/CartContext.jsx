@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext } from "react";
 import axios from "axios";
+import { toast } from "sonner";
 
 export const CartContext = createContext();
 
@@ -48,6 +49,43 @@ export const CartProvider = ({ children }) => {
         );
     };
 
+    const onAddToCart = async (productId) => {
+        try {
+            const res = await axios.post(
+                `http://localhost:5000/api/v1/cart/${productId}`,
+                {},
+                { withCredentials: true }
+            );
+
+            console.log("Response is:", res);
+
+            // const items = await getCartItems(); // cart refresh
+            // console.log("Items are:", items);
+
+            toast.success("Item added to cart successfully");
+
+        } catch (error) {
+            console.log(error.response?.data);
+
+        }
+    };
+
+
+    const handleRemove = async (productId) => {
+
+
+        try {
+            await axios.delete(
+                `http://localhost:5000/api/v1/cart/${productId}`,
+                { withCredentials: true }
+            );
+            toast.success("Item removed from cart successfully");
+            getCartItems();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const total = cartItems.reduce(
         (acc, item) => acc + item.product.price * item.quantity,
         0
@@ -61,7 +99,9 @@ export const CartProvider = ({ children }) => {
                 decreaseQty,
                 total,
                 getCartItems,
-                setCartItems
+                setCartItems,
+                handleRemove,
+                onAddToCart
             }}
         >
             {children}

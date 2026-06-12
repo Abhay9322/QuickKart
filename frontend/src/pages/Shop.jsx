@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ProductCard from "../components/shop/ProductCard";
+import { toast } from "sonner";
 
 const Shop = () => {
 
@@ -28,7 +29,8 @@ const Shop = () => {
                 { withCredentials: true }
             );
 
-            alert("Added to cart 🌱");
+            // alert("Added to cart 🌱");
+            toast.success("Item added to cart successfully");
 
         } catch (error) {
             console.log(error.response?.data);

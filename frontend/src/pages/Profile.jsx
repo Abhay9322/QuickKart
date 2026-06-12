@@ -8,6 +8,8 @@ import StatsCard from "../components/profile/StatsCard";
 import OrderCard from "../components/profile/OrderCard";
 import AddressCard from "../components/profile/AddressCard";
 import LogoutButton from "../components/profile/LogoutButton";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import { UserContext } from "../context/UserContex";
 
@@ -17,7 +19,24 @@ const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const navigate = useNavigate()
+
     const userId = user?._id;
+
+    const logout = async () => {
+        try {
+            await axios.post("http://localhost:5000/api/v1/auth/logout", {}, {
+                withCredentials: true,
+            });
+            // alert("Logout successfully");
+            toast.success("User Logged out successfully");
+
+            navigate("/auth")
+        } catch (error) {
+            console.log("Logout error:", error);
+        }
+    };
+
 
     useEffect(() => {
         if (!userId) {
@@ -132,7 +151,7 @@ const Profile = () => {
 
                 {/* Logout Button */}
                 <div className="flex justify-center sm:justify-end">
-                    <LogoutButton />
+                    <LogoutButton logout={logout} />
                 </div>
 
             </div>

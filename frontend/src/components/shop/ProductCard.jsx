@@ -8,10 +8,9 @@ const ProductCard = ({ product, onAddToCart }) => {
     return (
         <div
             className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/40 transition cursor-pointer"
-            onClick={() => navigate(`/product/${product._id}`)}
         >
 
-            <div className="h-44 overflow-hidden">
+            <div className="h-44 overflow-hidden" onClick={() => navigate(`/product/${product._id}`)}>
                 <img
                     src={product.images?.[0]?.url}
                     className="w-full h-full object-cover group-hover:scale-110 transition"

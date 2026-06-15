@@ -58,7 +58,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
                     </div>
 
                     <button
-                        onClick={() => onRemove(item?._id)}
+                        onClick={() => onRemove(item.product._id)}
                         className="px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition duration-300 cursor-pointer"
                     >
                         Remove

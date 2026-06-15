@@ -7,10 +7,10 @@ const ProductCard = ({ product, onAddToCart }) => {
 
     return (
         <div className="group backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-green-500/40 transition-all duration-300 cursor-pointer"
-            onClick={() => navigate(`/product/${product._id}`)}>
+        >
 
             {/* IMAGE */}
-            <div className="h-60 overflow-hidden">
+            <div className="h-60 overflow-hidden" onClick={() => navigate(`/product/${product._id}`)}>
 
                 <img
                     src={product?.images?.[0]?.url || "https://images.unsplash.com/photo-1542838132-92c53300491e"}

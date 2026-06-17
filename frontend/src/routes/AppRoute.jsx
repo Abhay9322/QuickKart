@@ -16,6 +16,16 @@ import About from "../pages/About";
 import Dashboard from "../pages/Dashboard";
 import OrderSuccess from "../pages/OrderSuccess";
 import MyOrders from "../pages/MyOrders";
+import Product from "../pages/Admin/Products"
+// import Orders from "../pages/Admin/Orders";
+import Farmers from "../pages/Admin/Farmers";
+import Customers from "../pages/Admin/Customers";
+import AdminLayout from "../components/layout/AdminLayout";
+import CreateProduct from "../components/dashboard/CreateProduct";
+
+import ViewOrder from "../pages/Admin/orders/ViewOrder";
+import Orders from "../pages/Admin/orders/Orders";
+import UpdateOrder from "../pages/Admin/orders/UpdateOrder";
 
 const AppRoute = () => {
     return (
@@ -34,7 +44,28 @@ const AppRoute = () => {
                     <Route path="/admin" element={<Dashboard />} />
                     <Route path="/product/:id" element={<ProductDetails />} />
                     <Route path="/my-orders" element={<MyOrders />} />
+                    <Route path="/admin/products" element={<Product />} />
+                    <Route path="/admin/orders" element={<Orders />} />
+                    <Route path="/admin/farmers" element={<Farmers />} />
+                    <Route path="/admin/createProduct" element={<CreateProduct />} />
+                    <Route path="/admin/customers" element={<Customers />} />
                     <Route path="/order-success/:id" element={<OrderSuccess />} />
+
+                    <Route
+                        path="/admin/orders"
+                        element={<Orders />}
+                    />
+
+                    <Route
+                        path="/admin/orders/view/:id"
+                        element={<ViewOrder />}
+                    />
+
+                    <Route
+                        path="/admin/orders/update/:id"
+                        element={<UpdateOrder />}
+                    />
+
                 </Routes>
             </Layout>
         </BrowserRouter>

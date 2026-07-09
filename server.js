@@ -18,10 +18,11 @@ const errorHandler = require("./utils/errorHandler")
 
 const connectDB = require("./db/db");
 
+
 const app = express();
 app.use(
     cors({
-        origin: "http://localhost:5173", // your frontend URL
+        origin: "http://localhost:5173",
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
     })
@@ -31,6 +32,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 connectDB();
+
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/admin", adminRoute);

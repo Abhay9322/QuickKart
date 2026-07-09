@@ -134,8 +134,7 @@ const login = asyncHandler(async (req, res) => {
     const refreshToken = generateRefreshToken(user);
 
     user.refreshToken = refreshToken;
-    await user.save();
-
+    await user.save({ validateBeforeSave: false });
     res.cookie("token", accessToken, {
         httpOnly: true,
         secure: false,       // local me false
@@ -148,6 +147,7 @@ const login = asyncHandler(async (req, res) => {
             statusCode: 200,
             message: "User logged in successfully",
             data: {
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
@@ -202,6 +202,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 
 const logout = asyncHandler(async (req, res) => {
+
+    console.log("Inside logout controller");
+    console.log("COOKIES:", req.cookies);
+
+
     const userId = req.user.id;
 
     const user = await User.findById(userId);

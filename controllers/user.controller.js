@@ -10,21 +10,11 @@ const getProfile = asyncHandler(async (req, res) => {
 
     console.log("Inside getProfile Controller");
 
-    // const token = req.cookies?.Token;
-    const userId = req.params.id
-
-    // if (!token) {
-    //     throw new ApiError({
-    //         statusCode: 400,
-    //         message: "Token not found"
-    //     });
-    // }
-
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-    // const user = await User.findById(decoded.id).select("-password");
+    const userId = req.params.id;
 
     const user = await User.findById(userId)
+        .populate("orders")
+        .select("-password");
 
     if (!user) {
         throw new ApiError({
@@ -42,52 +32,41 @@ const getProfile = asyncHandler(async (req, res) => {
         })
     );
 });
-
 const updateProfile = asyncHandler(async (req, res) => {
+    console.log("Inside updateProfile");
+
+    console.log("Body:", req.body);
+
+    console.log("File:", req.file);
+
     const userId = req.user.id;
-    const { name, phone } = req.body;
-    let { address } = req.body;
 
     const user = await User.findById(userId);
 
+    console.log("User Found:", user?._id);
+
     if (!user) {
-        throw new ApiError({
-            statusCode: 404,
+        return res.status(404).json({
+            success: false,
             message: "User not found"
         });
     }
 
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-
     if (req.file) {
+        console.log("Cloudinary URL:", req.file.path);
+
         user.profileImage = req.file.path;
-    }
-
-    if (address) {
-        if (typeof address === "string") {
-            address = JSON.parse(address);
-        }
-
-        if (address.isDefault) {
-            user.address.forEach(addr => {
-                addr.isDefault = false;
-            });
-        }
-
-        user.address.push(address);
     }
 
     await user.save();
 
-    return res.status(200).json(
-        new ApiResponse({
-            statusCode: 200,
-            success: true,
-            message: "Profile updated successfully",
-            data: user
-        })
-    );
+    console.log("User Saved Successfully");
+
+    return res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        data: user
+    });
 });
 
 const uploadProfileImage = asyncHandler(async (req, res) => {
@@ -118,8 +97,34 @@ const uploadProfileImage = asyncHandler(async (req, res) => {
     );
 });
 
+const getUsers = asyncHandler(async (req, res) => {
+
+    console.log("Inside getUser Controller");
+
+    const users = await User.find()
+        .populate("orders")
+        .select("-password");
+
+    if (!users) {
+        throw new ApiError({
+            statusCode: 404,
+            message: "Users not found"
+        });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            success: true,
+            message: "Users profile fetched successfully",
+            data: users
+        })
+    );
+});
+
 module.exports = {
     getProfile,
     updateProfile,
-    uploadProfileImage
+    uploadProfileImage,
+    getUsers
 };

@@ -89,18 +89,37 @@ const productIdValidator = () => [
 
 // --------- Order Validators ---------
 const createOrderValidator = () => [
-    body("shippingAddress")
-        .trim()
-        .notEmpty().withMessage("Shipping address is required")
-        .isLength({ min: 5 }).withMessage("Shipping address too short"),
+    body("shippingAddress.fullName")
+        .notEmpty()
+        .withMessage("Full Name is required"),
+
+    body("shippingAddress.phone")
+        .notEmpty()
+        .withMessage("Phone is required"),
+
+    body("shippingAddress.addressLine1")
+        .notEmpty()
+        .withMessage("Address is required"),
+
+    body("shippingAddress.city")
+        .notEmpty()
+        .withMessage("City is required"),
+
+    body("shippingAddress.state")
+        .notEmpty()
+        .withMessage("State is required"),
+
+    body("shippingAddress.postalCode")
+        .notEmpty()
+        .withMessage("Postal Code is required"),
+
+    body("shippingAddress.country")
+        .notEmpty()
+        .withMessage("Country is required"),
 
     body("paymentMethod")
-        .optional()
-        .isIn(["COD", "ONLINE"]).withMessage("Payment method must be COD or ONLINE"),
-
-    body("couponCode")
-        .optional()
-        .isString().withMessage("Coupon code must be a string")
+        .isIn(["COD", "Stripe", "Razorpay"])
+        .withMessage("Invalid payment method")
 ];
 
 const orderIdParamValidator = () => [
@@ -181,7 +200,7 @@ const addToCartValidator = () => [
 ];
 
 const removeFromCartValidator = () => [
-    body("productId")
+    param("productId")
         .trim()
         .notEmpty().withMessage("Product ID should not be empty")
         .isMongoId().withMessage("Invalid Product ID")

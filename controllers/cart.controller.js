@@ -58,8 +58,12 @@ const addToCart = asyncHandler(async (req, res) => {
 
 const removeFromCart = asyncHandler(async (req, res) => {
 
+    // const userId = req.user?.id;
+    // const { productId } = req.body;
+
+
     const userId = req.user?.id;
-    const { productId } = req.body;
+    const { productId } = req.params;
 
     if (!userId) {
         throw new ApiError({

@@ -7,12 +7,14 @@ const isLoggedIn = require("../middlewares/auth.middleware");
 const {
     getProfile,
     updateProfile,
-    uploadProfileImage
+    uploadProfileImage,
+    getUsers
 } = require("../controllers/user.controller");
 
 // router.get("/profile", isLoggedIn, getProfile);
 
 router.get("/profile/:id", getProfile);
+router.get("/users", getUsers);
 
 router.put("/profile", isLoggedIn, upload.single("profileImage"), updateProfile);
 

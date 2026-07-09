@@ -21,7 +21,7 @@ router.get("/", isLoggedIn, getCartItems);
 router.get("/", getCartItems);
 // router.post("/:productId", addToCartValidator(), validate, isLoggedIn, addToCart);
 
-router.delete("/:productId", removeFromCartValidator(), validate, validate, isLoggedIn, removeFromCart);
+router.delete("/:productId", removeFromCartValidator(), validate, isLoggedIn, removeFromCart);
 
 router.delete("/", isLoggedIn, clearCart);
 

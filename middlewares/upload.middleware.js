@@ -4,23 +4,23 @@ const cloudinary = require("../db/cloudinary");
 
 const storage = new CloudinaryStorage({
     cloudinary,
-    params: (req, file) => {
 
-        let folder = "QuickCart/others"; // default folder
+    params: async (req, file) => {
 
-        // agar request user route se aayi
+        console.log("File received =>", file);
+
+        let folder = "QuickCart/others";
+
         if (req.baseUrl.includes("users")) {
             folder = "QuickCart/users/profile";
         }
 
-        // agar request product route se aayi
         if (req.baseUrl.includes("products")) {
             folder = "QuickCart/products/images";
         }
 
         return {
-            folder: folder,
-            allowed_formats: ["jpg", "png", "jpeg"],
+            folder,
             transformation: [
                 {
                     width: 400,
@@ -33,6 +33,11 @@ const storage = new CloudinaryStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 5MB
+    }
+});
 
 module.exports = upload;

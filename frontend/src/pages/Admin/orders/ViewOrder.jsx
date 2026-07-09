@@ -30,120 +30,112 @@ const ViewOrder = () => {
     if (!order) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <h2 className="text-xl font-semibold text-slate-600">
-                    Loading Order...
-                </h2>
+                Loading Order...
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 p-6">
+        <div className="min-h-screen bg-slate-100 p-4 md:p-6">
 
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-6xl mx-auto">
 
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-2xl shadow-lg mb-6">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 shadow-lg mb-6">
+
                     <h1 className="text-3xl font-bold text-white">
                         Order Details
                     </h1>
 
                     <p className="text-indigo-100 mt-2">
-                        Complete order information
+                        Complete information about the order
                     </p>
+
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-lg p-6">
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
 
                     <div className="grid md:grid-cols-2 gap-6">
 
                         <div>
-                            <h3 className="font-bold text-slate-800 mb-2">
-                                Order Information
-                            </h3>
 
-                            <p className="mb-2">
-                                <span className="font-semibold">
-                                    Order ID:
-                                </span>{" "}
-                                {order.orderId}
-                            </p>
+                            <h2 className="font-bold text-lg mb-3">
+                                Customer Information
+                            </h2>
 
-                            <p className="mb-2">
-                                <span className="font-semibold">
-                                    Customer:
-                                </span>{" "}
+                            <p>
+                                <strong>Name:</strong>{" "}
                                 {order.shippingAddress?.fullName}
                             </p>
 
-                            <p className="mb-2">
-                                <span className="font-semibold">
-                                    Email:
-                                </span>{" "}
+                            <p>
+                                <strong>Email:</strong>{" "}
                                 {order.user?.email}
                             </p>
+
+                            <p>
+                                <strong>Order ID:</strong>{" "}
+                                {order.orderId}
+                            </p>
+
                         </div>
 
                         <div>
-                            <h3 className="font-bold text-slate-800 mb-2">
-                                Payment Information
-                            </h3>
 
-                            <p className="mb-2">
-                                <span className="font-semibold">
-                                    Total Amount:
-                                </span>{" "}
-                                ₹{order.pricingDetails?.grandTotal}
+                            <h2 className="font-bold text-lg mb-3">
+                                Payment Information
+                            </h2>
+
+                            <p>
+                                <strong>Total:</strong> ₹
+                                {order.pricingDetails?.grandTotal}
                             </p>
 
-                            <p className="mb-2">
-                                <span className="font-semibold">
-                                    Status:
-                                </span>
+                            <p>
+                                <strong>Status:</strong>{" "}
 
-                                <span
-                                    className={`ml-2 px-3 py-1 rounded-full text-sm font-medium ${order.orderStatus === "delivered"
-                                            ? "bg-green-100 text-green-700"
-                                            : order.orderStatus === "pending"
-                                                ? "bg-yellow-100 text-yellow-700"
-                                                : "bg-blue-100 text-blue-700"
-                                        }`}
-                                >
+                                <span className="ml-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700">
                                     {order.orderStatus}
                                 </span>
+
                             </p>
+
                         </div>
 
                     </div>
 
                     <hr className="my-6" />
 
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                    <h2 className="text-xl font-bold mb-4">
                         Ordered Products
                     </h2>
 
                     <div className="space-y-4">
+
                         {order.items?.map((item) => (
                             <div
                                 key={item._id}
-                                className="border rounded-xl p-4 hover:shadow-md transition"
+                                className="border rounded-xl p-4"
                             >
                                 <div className="flex justify-between">
+
                                     <div>
-                                        <h3 className="font-semibold text-slate-800">
+                                        <h3 className="font-semibold">
                                             {item.name}
                                         </h3>
 
-                                        <p className="text-slate-600">
-                                            Quantity: {item.quantity}
+                                        <p>
+                                            Qty : {item.quantity}
                                         </p>
                                     </div>
 
-                                    <div className="font-bold text-emerald-600">
+                                    <div className="font-bold text-green-600">
                                         ₹{item.price}
                                     </div>
+
                                 </div>
                             </div>
                         ))}
+
                     </div>
 
                     <button

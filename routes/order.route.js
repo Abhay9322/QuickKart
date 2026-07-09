@@ -8,7 +8,8 @@ const {
     orderHistory,
     returnRequest,
     cancelOrder,
-    exchangeRequest
+    exchangeRequest,
+    getOrderById
 } = require("../controllers/order.controller");
 
 const isLoggedIn = require("../middlewares/auth.middleware");
@@ -21,9 +22,10 @@ const router = express.Router();
 
 router.post("/", createOrderValidator(), validate, isLoggedIn, createOrder);
 
-router.get("/my-orders", userIdValidator(), validate, isLoggedIn, getUserOrders);
+// router.get("/", userIdValidator(), validate, getUserOrders);
 
-router.get("/", isLoggedIn, getOrders);
+// router.get("/", isLoggedIn, getOrders);
+router.get("/", getOrders);
 
 router.get("/:id/status", orderIdParamValidator(), validate, isLoggedIn, orderStatus);
 
@@ -34,5 +36,7 @@ router.post("/:id/return", returnExchangeValidator(), validate, isLoggedIn, retu
 router.put("/:id/cancel", orderIdParamValidator(), validate, isLoggedIn, cancelOrder);
 
 router.put("/:id/exchange", returnExchangeValidator(), validate, isLoggedIn, exchangeRequest);
+
+router.get("/:id", isLoggedIn, getOrderById);
 
 module.exports = router;

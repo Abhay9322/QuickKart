@@ -21,6 +21,9 @@ const isLoggedIn = async (req, res, next) => {
 
         const user = await User.findById(decoded.id);
 
+        console.log("User is", user);
+
+
         if (!user) {
             return res.status(403).json({
                 message: "User not found"

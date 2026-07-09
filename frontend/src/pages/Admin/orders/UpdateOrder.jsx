@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const UpdateOrder = () => {
     const { id } = useParams();
@@ -16,14 +16,14 @@ const UpdateOrder = () => {
 
     const fetchOrder = async () => {
         try {
-            const res = await axios.get(
+            const response = await axios.get(
                 `http://localhost:5000/api/v1/orders/${id}`,
                 {
                     withCredentials: true,
                 }
             );
 
-            setStatus(res.data.data.orderStatus);
+            setStatus(response.data.data.orderStatus);
         } catch (error) {
             console.log(error);
         }
@@ -54,30 +54,43 @@ const UpdateOrder = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 flex justify-center items-center p-6">
+        <div className="min-h-screen bg-slate-100 flex justify-center items-center p-4">
 
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden">
 
                 <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+
                     <h1 className="text-3xl font-bold text-white">
-                        Update Order Status
+                        Update Order
                     </h1>
 
                     <p className="text-indigo-100 mt-2">
-                        Change order delivery status
+                        Update delivery status
                     </p>
+
                 </div>
 
                 <div className="p-6">
 
-                    <label className="block font-semibold text-slate-700 mb-2">
-                        Select Status
+                    <label className="block mb-2 font-semibold">
+                        Order Status
                     </label>
 
                     <select
                         value={status}
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onChange={(e) =>
+                            setStatus(e.target.value)
+                        }
+                        className="
+                            w-full
+                            border
+                            border-slate-300
+                            rounded-lg
+                            p-3
+                            focus:ring-2
+                            focus:ring-indigo-500
+                            outline-none
+                        "
                     >
                         <option value="pending">
                             Pending
@@ -100,11 +113,20 @@ const UpdateOrder = () => {
                         </option>
                     </select>
 
-                    <div className="flex gap-3 mt-6">
+                    <div className="flex flex-col md:flex-row gap-3 mt-6">
 
                         <button
-                            onClick={() => navigate("/admin/orders")}
-                            className="flex-1 bg-slate-500 hover:bg-slate-600 text-white py-3 rounded-lg"
+                            onClick={() =>
+                                navigate("/admin/orders")
+                            }
+                            className="
+                                flex-1
+                                bg-slate-500
+                                hover:bg-slate-600
+                                text-white
+                                py-3
+                                rounded-lg
+                            "
                         >
                             Cancel
                         </button>
@@ -112,7 +134,14 @@ const UpdateOrder = () => {
                         <button
                             onClick={updateOrder}
                             disabled={loading}
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg"
+                            className="
+                                flex-1
+                                bg-emerald-600
+                                hover:bg-emerald-700
+                                text-white
+                                py-3
+                                rounded-lg
+                            "
                         >
                             {loading
                                 ? "Updating..."
